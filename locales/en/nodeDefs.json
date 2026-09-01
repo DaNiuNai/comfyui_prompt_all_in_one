@@ -1,0 +1,28 @@
+{
+  "PromptAllInOne_Positive": {
+    "display_name": "Prompt All in One · Positive",
+    "description": "Build and manage a positive prompt in the Prompt All in One sidebar.",
+    "inputs": {
+      "prompt": {
+        "display_name": "Prompt",
+        "tooltip": "Select the node and open the Prompt All in One sidebar to edit it."
+      }
+    },
+    "outputs": {
+      "prompt": { "display_name": "STRING" }
+    }
+  },
+  "PromptAllInOne_Negative": {
+    "display_name": "Prompt All in One · Negative",
+    "description": "Build and manage a negative prompt in the Prompt All in One sidebar.",
+    "inputs": {
+      "prompt": {
+        "display_name": "Prompt",
+        "tooltip": "Select the node and open the Prompt All in One sidebar to edit it."
+      }
+    },
+    "outputs": {
+      "prompt": { "display_name": "STRING" }
+    }
+  }
+}

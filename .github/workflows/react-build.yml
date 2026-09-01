@@ -5,15 +5,16 @@ on:
     branches: [ "main" ]
     paths:
       - 'pyproject.toml'
+      - 'prompt_all_in_one/**'
+      - 'ui/**'
+      - '__init__.py'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: ${{ github.repository_owner == 'Comfy-Org' }}
-
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
 
     steps:
     - uses: actions/checkout@v4
@@ -26,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd ui
-        npm install
+        npm ci
 
     - name: Build React extension
       run: |

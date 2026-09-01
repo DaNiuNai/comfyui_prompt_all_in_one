@@ -1,229 +1,98 @@
 # comfyui-prompt-all-in-one
 
-![react-example-demo](https://github.com/DaNiuNai/comfyui_prompt_all_in_one/blob/assets-branch/docs/demo.gif)
+面向 ComfyUI 的提示词编辑、整理和翻译扩展。项目由
+[`sd-webui-prompt-all-in-one`](https://github.com/Physton/sd-webui-prompt-all-in-one)
+迁移而来，使用两个专用 `STRING` 节点和 React 侧边栏代替 A1111 固定的正/负提示词输入框。
 
-![demo pic](https://github.com/DaNiuNai/comfyui_prompt_all_in_one/blob/assets-branch/react-example-demo.png)
+## 功能
 
-A minimal template for creating React/TypeScript frontend extensions for ComfyUI, with complete boilerplate setup.
+- `Prompt All in One · Positive` 与 `Prompt All in One · Negative` 两个 V3 节点，原样输出 `STRING`。
+- 标签拆分、直接编辑、拖拽排序、批量启用/禁用/删除、权重增减、括号包装、格式化和黑名单。
+- 完整中英文分组提示词词库，支持搜索和一键插入。
+- 正向、负向分别保存最近 100 条编辑历史，并提供独立收藏夹。
+- 原项目的在线翻译服务以及兼容 OpenAI API 的提示词生成。
+- 检测 ComfyUI 已安装的 Checkpoint、LoRA 和 Embedding 引用。
+- 简体中文和英文界面，适配 ComfyUI 明暗主题。
+- 按 ComfyUI 用户隔离历史、收藏、设置和服务凭据。
+- 从旧版 `storage` 文件夹一次性导入历史、收藏和非敏感设置。
 
-📚 **[ComfyUI JavaScript Developer Documentation](https://docs.comfy.org/custom-nodes/js/javascript_overview)** - Learn how to use ComfyUI's powerful extension APIs.
+## 安装
 
-## Features
+推荐通过 ComfyUI Manager 搜索 `comfyui-prompt-all-in-one` 安装。
 
-- **React & TypeScript Integration**: Ready-to-use setup for creating modern UI components within ComfyUI
-- **Internationalization Framework**: Built-in i18n support with English and Chinese examples
-- **ComfyUI API Integration**: Properly typed access to ComfyUI's internal API
-- **Full TypeScript Support**: Type-safe code using ComfyUI's official type definitions
-- **Auto-Reload Development**: Watch mode for seamless development experience
+手动开发安装：
 
-## Installation
-
-### From ComfyUI Registry (Recommended)
-
-The easiest way to install this extension is through the ComfyUI Manager:
-
-1. Open ComfyUI and go to the Manager
-2. Search for "React Extension Template"
-3. Click Install
-
-### Manual Installation
-
-If you want to install directly from GitHub for development purposes:
-
-```bash
-# Go to your ComfyUI custom_nodes directory
-cd ComfyUI/custom_nodes
-
-# Clone the repository
+```powershell
+Set-Location E:\ComfyUI-Dev\custom_nodes
 git clone https://github.com/DaNiuNai/comfyui_prompt_all_in_one.git
-
-# Build the React application
-cd comfyui_prompt_all_in_one/ui
-npm install
+Set-Location .\comfyui_prompt_all_in_one
+uv pip install --python ..\..\.venv\Scripts\python.exe -r requirements.txt
+Set-Location .\ui
+npm ci
 npm run build
-
-# Restart ComfyUI
 ```
 
-⚠️ **Important**: When installing manually from GitHub, you **must** run `npm run build` in the `ui/` directory before the extension will work. The extension requires the compiled React code in the `dist/` folder to function properly in ComfyUI.
+完成后重启 ComfyUI。发布包通常已经包含 `dist/`，只有直接从源码开发时才需要手动构建前端。
 
-## Usage
+## 使用
 
-This template includes a simple example extension that displays workflow node statistics. After installation:
+1. 在工作流中添加正向或负向 Prompt All in One 节点。
+2. 选中节点，然后打开左侧的 Prompt All in One 标签页；也可以点击节点上的 `Open Prompt Editor`。
+3. 在侧边栏编辑标签，将节点的 `STRING` 输出连接到对应的文本编码节点。
+4. 编辑框失焦、切换节点或完成编辑时会写入历史；连续相同内容不会重复保存。
 
-1. Look for the "React Example" tab in the ComfyUI sidebar
-2. Click to open the example UI
+节点上的标准多行文本框始终可直接编辑。侧边栏保存的禁用状态、译文和排序信息随工作流节点属性一起序列化，实际输出仍是普通字符串。
 
-When developing your own extension, you can:
-1. Replace the example UI in App.tsx with your own components
-2. Update the tab title and icon in main.tsx
-3. Customize the extension's appearance and behavior
+### LoRA 与模型检测
 
-## Development
+侧边栏只检测 `<lora:name:weight>`、`embedding:name` 和 `checkpoint:name` 引用是否存在。ComfyUI 不会像 A1111 一样解析 `<lora:...>` 并自动加载模型；必须在工作流中使用 LoRA Loader 等对应节点。
 
-### Setup Development Environment
+### 旧数据导入
 
-```bash
-# Go to the UI directory
-cd ui
+在“设置 → 导入旧数据”中选择旧项目的 `storage` 文件夹：
 
-# Install dependencies
-npm install
+- `txt2img` 与 `img2img` 历史合并到正向分类。
+- `txt2img_neg` 与 `img2img_neg` 合并到负向分类。
+- 导入采用合并模式，可先预览；重复导入是幂等的。
+- API 密钥不会上传或导入，必须在新扩展中重新填写。
 
-# Start development mode (watches for changes)
-npm run watch
+浏览器只上传白名单中的 JSON 文件，后端不接受任意服务器磁盘路径。
+
+## 数据与安全
+
+用户数据位于：
+
+```text
+ComfyUI/user/<用户 ID>/prompt_all_in_one/
 ```
 
-### Available ComfyUI Extension APIs
+服务凭据仅保存在对应用户的服务端 JSON 中，接口只返回脱敏值，日志不会主动输出密钥。凭据目前没有额外加密，请依靠操作系统文件权限保护 ComfyUI 用户目录，并避免将该目录纳入版本控制或公开备份。
 
-This template provides access to ComfyUI's powerful JavaScript APIs through the official type definitions. You can use these APIs to build rich extensions:
+翻译和 AI 操作会把所选文本发送到用户配置的第三方服务；普通工作流执行不会触发任何外部请求。离线 mBART、运行时安装依赖、A1111 主题 CSS 和远程自更新不在迁移范围内。
 
-- **Sidebar Tabs**: Create custom sidebar panels like this template demonstrates
-- **Bottom Bar Panels**: Add panels to the bottom of the UI
-- **Top Menu Items**: Add custom entries to the top menu
-- **Context Menus**: Create custom context menus for the graph
-- **Settings**: Add settings to the ComfyUI settings panel
-- **Toasts**: Display notification messages
-- **Commands**: Create and register custom commands
-- **Hotkeys/Keybindings**: Register custom keyboard shortcuts
-- **About Panel Badges**: Add badges to the about panel
-- **App Events**: Listen to and respond to app events
-- **Graph Manipulation**: Programmatically manipulate the workflow graph
+## 开发与验证
 
-For comprehensive documentation on all available APIs, see the [ComfyUI JavaScript Developer Documentation](https://docs.comfy.org/custom-nodes/js/javascript_overview).
+前端命令在 `ui/` 中运行：
 
-### File Structure
-
-```
-comfyui_prompt_all_in_one/
-├── .github/                    # GitHub configurations
-│   └── workflows/
-│       └── react-build.yml     # Automatic build and publishing workflow
-├── __init__.py                 # Python entry point for ComfyUI integration
-├── pyproject.toml              # Project metadata for ComfyUI Registry
-├── dist/                       # Built extension files (generated)
-└── ui/                         # React application
-    ├── public/
-    │   └── locales/            # Internationalization files
-    │       ├── en/
-    │       │   └── main.json   # English translations
-    │       └── zh/
-    │           └── main.json   # Chinese translations
-    ├── src/
-    │   ├── App.tsx             # Main React component with example UI
-    │   ├── App.css             # Styles for the example UI
-    │   ├── index.css           # Global styles and theme variables
-    │   ├── main.tsx            # Entry point for React app
-    │   ├── vite-env.d.ts       # Vite environment types
-    │   ├── setupTests.ts       # Testing environment setup
-    │   ├── __tests__/          # Unit tests for components
-    │   │   └── dummy.test.tsx  # Example test
-    │   └── utils/
-    │       └── i18n.ts         # Internationalization setup
-    ├── eslint.config.js        # ESLint configuration
-    ├── jest.config.js          # Jest testing configuration
-    ├── jest.setup.js           # Jest setup file
-    ├── package.json            # npm dependencies
-    ├── tsconfig.json           # TypeScript configuration
-    ├── tsconfig.node.json      # TypeScript configuration for Node
-    └── vite.config.ts          # Build configuration
+```powershell
+npm ci
+npm run typecheck
+npm run lint
+npm test -- --runInBand
+npm run build
 ```
 
-### TypeScript Support
+Python 命令在项目根目录运行：
 
-This extension uses the official `@comfyorg/comfyui-frontend-types` package for type-safe interaction with ComfyUI APIs. To install it:
-
-```bash
-cd ui
-npm install -D @comfyorg/comfyui-frontend-types
+```powershell
+uv sync --extra dev
+uv run ruff check .
+uv run mypy
+uv run pytest
 ```
 
-## Publishing to ComfyUI Registry
+`dist/` 是 Vite 生成目录，请勿手工修改。
 
-### Prerequisites
+## 许可证与来源
 
-1. Set up a [Registry](https://registry.comfy.org) account
-2. Create an API key at https://registry.comfy.org/nodes
-
-### Steps to Publish
-
-1. Install the comfy-cli tool:
-   ```bash
-   pip install comfy-cli
-   ```
-
-2. Verify your pyproject.toml has the correct metadata:
-   ```toml
-   [project]
-   name = "your_extension_name"  # Use a unique name for your extension
-   description = "Your extension description here."
-   version = "0.1.0"  # Increment this with each update
-
-   [tool.comfy]
-   PublisherId = "your_publisher_id"  # Your Registry publisher ID
-   DisplayName = "Your Extension Display Name"
-   includes = ["dist/"]  # Include built React code (normally ignored by .gitignore)
-   ```
-
-3. Publish your extension:
-   ```bash
-   comfy-cli publish
-   ```
-
-4. When prompted, enter your API key
-
-### Automatic Publishing with GitHub Actions
-
-This template includes a GitHub Actions workflow that automatically publishes to the ComfyUI Registry whenever you update the version in pyproject.toml:
-
-1. Go to your repository's Settings > Secrets and variables > Actions
-2. Create a new repository secret called `REGISTRY_ACCESS_TOKEN` with your API key
-3. Commit and push an update to pyproject.toml (e.g., increment the version number)
-4. The GitHub Action will automatically run and publish your extension
-
-The workflow configuration is set up in `.github/workflows/react-build.yml` and will trigger when:
-- The `pyproject.toml` file is modified and pushed to the `main` branch
-
-The workflow automatically:
-1. Sets up Node.js environment
-2. Installs dependencies (`npm install`)
-3. Builds the React extension (`npm run build`)
-4. Publishes the extension to the ComfyUI Registry
-
-## Unit Testing
-
-This template includes a basic setup for unit testing with Jest and React Testing Library:
-
-```bash
-# Run tests
-npm test
-
-# Run tests in watch mode during development
-npm run test:watch
-```
-
-Example tests can be found in the `src/__tests__` directory. The setup includes:
-
-- Jest for running tests
-- React Testing Library for testing components
-- Mock implementation of the ComfyUI window.app object
-
-## Resources
-
-- [ComfyUI JS Extension Documentation](https://docs.comfy.org/custom-nodes/js/javascript_overview) - Official documentation for ComfyUI JavaScript Extensions
-- [ComfyUI Registry Documentation](https://docs.comfy.org/registry/publishing) - Learn how to publish your extension
-- [ComfyUI Frontend Repository](https://github.com/DaNiuNai/ComfyUI-Frontend) - The main ComfyUI frontend codebase
-- [Official ComfyUI Frontend Types](https://www.npmjs.com/package/@comfyorg/comfyui-frontend-types) - TypeScript definitions for ComfyUI
-- [React Extension Guide](REACT_EXTENSION_GUIDE.md) - Detailed guide for creating React extensions
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [React Documentation](https://react.dev/reference/react)
-- [Jest Documentation](https://jestjs.io/docs/getting-started)
-- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
-
-## Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests to improve this template.
-
-## License
-
-GNU General Public License v3
+本项目使用 GPL-3.0-only。迁移的词库、翻译服务元数据和适配器保留原项目的 MIT 许可，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

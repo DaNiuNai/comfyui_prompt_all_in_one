@@ -1,24 +1,93 @@
 {
-  "app": {
-    "title": "React 示例扩展",
-    "description": "显示当前工作流中节点的统计信息",
-    "noNodes": "工作流中没有节点",
-    "nodeList": {
-      "title": "节点列表",
-      "id": "ID",
-      "type": "类型",
-      "category": "类别",
-      "inputs": "输入",
-      "outputs": "输出"
-    },
-    "nodeStats": {
-      "title": "节点统计",
-      "totalNodes": "节点总数",
-      "uniqueNodeTypes": "唯一节点类型"
-    },
-    "footer": {
-      "clickToHighlight": "单击列表中的任何节点以在工作流中突出显示它"
-    }
+  "app": { "title": "提示词全能编辑器" },
+  "common": {
+    "add": "添加",
+    "copy": "复制提示词",
+    "delete": "删除",
+    "disable": "禁用",
+    "enable": "启用",
+    "favorite": "收藏",
+    "format": "格式化并去重",
+    "loading": "正在载入提示词编辑器…",
+    "select": "选择标签",
+    "selectAll": "全选/取消",
+    "translate": "翻译",
+    "working": "处理中…"
   },
-  "Click on any node in the list to highlight it in the workflow": "单击列表中的任何节点以在工作流中突出显示它"
+  "tabs": {
+    "editor": "编辑",
+    "words": "词库",
+    "history": "历史",
+    "favorites": "收藏",
+    "ai": "AI 生成",
+    "settings": "设置"
+  },
+  "node": {
+    "positive": "正向 · {{title}} #{{id}}",
+    "negative": "负向 · {{title}} #{{id}}",
+    "none": "尚未选择提示词节点",
+    "selectHint": "请在画布中选择 Prompt All in One 正向或负向节点。普通 STRING 节点不会被修改。"
+  },
+  "editor": {
+    "rawPrompt": "提示词文本",
+    "placeholder": "输入以逗号分隔的提示词",
+    "addPlaceholder": "添加一个或多个标签",
+    "batchTools": "批量工具",
+    "empty": "当前提示词为空",
+    "counts": "{{tags}} 个标签 · {{characters}} 个字符",
+    "weightDown": "降低权重",
+    "weightUp": "提高权重",
+    "wrap": "使用 {{wrapper}} 包裹",
+    "useTranslation": "使用此译文替换原标签"
+  },
+  "library": {
+    "search": "搜索英文或中文提示词",
+    "resultLimit": "当前仅显示前 400 项，请输入关键词缩小范围。"
+  },
+  "collections": {
+    "history": "编辑历史",
+    "favorites": "收藏夹",
+    "untitled": "未命名",
+    "empty": "暂无记录"
+  },
+  "models": {
+    "found": "已在 ComfyUI 模型目录中找到",
+    "missing": "未找到对应资源；LoRA 仍需通过 LoRA Loader 加载"
+  },
+  "settings": {
+    "interface": "界面",
+    "interfaceLanguage": "界面与词库语言",
+    "prompt": "提示词格式",
+    "separator": "标签分隔符",
+    "normalizeSpaces": "规范分隔符空格",
+    "trailingComma": "保留末尾逗号",
+    "blacklist": "黑名单（每行或逗号分隔）",
+    "translation": "在线翻译",
+    "provider": "翻译服务",
+    "sourceLanguage": "源语言",
+    "targetLanguage": "目标语言",
+    "secretConfigured": "已配置；留空可保留现有密钥",
+    "saveService": "保存服务配置",
+    "ai": "兼容 OpenAI 的 AI 服务",
+    "api_base": "API 地址",
+    "model": "模型",
+    "api_key": "API 密钥",
+    "importTitle": "导入旧数据",
+    "importHint": "选择旧版 storage 文件夹。只上传受支持的 JSON；翻译及 AI 密钥不会导入。",
+    "previewImport": "预览导入",
+    "commitImport": "确认导入",
+    "importSummary": "可导入 {{accepted}} 条，跳过 {{skipped}} 条，无效 {{invalid}} 条，设置 {{settings}} 项。"
+  },
+  "ai": {
+    "request": "描述你希望生成的画面",
+    "placeholder": "例如：雨夜东京街头的电影感人像",
+    "generate": "生成提示词",
+    "use": "追加到当前提示词"
+  },
+  "messages": {
+    "copied": "提示词已复制",
+    "favorited": "已加入收藏",
+    "saved": "设置已保存",
+    "translated": "翻译完成"
+  }
 }

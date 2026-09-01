@@ -5,16 +5,22 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "comfyui_prompt_all_in_one"
 version = "0.0.1"
-description = "A collection of custom nodes for ComfyUI"
+description = "A bilingual prompt editor, library, history, translation, and AI assistant for ComfyUI"
 authors = [
   {name = "DaNiuNai", email = "you@gmail.com"}
 ]
 readme = "README.md"
-license = {text = "GNU General Public License v3"}
+license = "GPL-3.0-only"
 requires-python = ">=3.10"
 classifiers = []
 dependencies = [
-
+    "requests>=2.31",
+    "PyYAML>=6.0",
+    "openai>=1.0",
+    "boto3>=1.34",
+    "aliyun-python-sdk-core>=2.15",
+    "aliyun-python-sdk-alimt>=3.0",
+    "translators>=5.9",
 ]
 
 
@@ -27,6 +33,8 @@ dev = [
     "pre-commit", # runs linting on commit
     "pytest",  # testing
     "ruff",  # linting
+    "types-PyYAML",
+    "types-requests",
 ]
 
 [project.urls]
@@ -39,12 +47,16 @@ Documentation = "https://github.com/DaNiuNai/comfyui_prompt_all_in_one/wiki"
 PublisherId = "DaNiuNai"
 DisplayName = "comfyui-prompt-all-in-one"
 Icon = ""
-Tags = []
+Tags = ["prompt", "translation", "productivity"]
 Repository = "https://github.com/DaNiuNai/comfyui_prompt_all_in_one"
 includes = ["dist/"]
 
 [tool.setuptools.package-data]
 "*" = ["*.*"]
+
+[tool.setuptools.packages.find]
+include = ["prompt_all_in_one*"]
+exclude = ["ui*", "tests*"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
@@ -53,7 +65,9 @@ testpaths = [
 ]
 
 [tool.mypy]
-files = "."
+files = ["prompt_all_in_one", "tests"]
+mypy_path = "typings"
+explicit_package_bases = true
 
 # Use strict defaults
 strict = true
@@ -66,11 +80,19 @@ module = "tests.*"
 allow_untyped_defs = true
 disable_error_code = "attr-defined"
 
+[[tool.mypy.overrides]]
+module = "prompt_all_in_one.legacy_translators.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "translators"
+ignore_missing_imports = true
+
 [tool.ruff]
-# extend-exclude = ["static", "ci/templates"]
+extend-exclude = ["prompt_all_in_one/legacy_translators"]
 line-length = 140
-src = ["src", "tests"]
-target-version = "py39"
+src = ["prompt_all_in_one", "tests"]
+target-version = "py310"
 
 # Add rules to ban exec/eval
 [tool.ruff.lint]

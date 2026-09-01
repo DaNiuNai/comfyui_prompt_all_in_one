@@ -18,7 +18,7 @@
   "dependencies": {
     "i18next": "^23.10.2",
     "i18next-browser-languagedetector": "^7.2.2",
-    "i18next-http-backend": "^2.5.0",
+    "i18next-http-backend": "^4.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^14.1.0"
@@ -34,7 +34,7 @@
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@typescript-eslint/parser": "^8.32.1",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^5.2.0",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.0",
@@ -50,6 +50,6 @@
     "ts-jest": "^29.3.4",
     "typescript": "^5.4.2",
     "typescript-eslint": "^8.32.1",
-    "vite": "^5.2.10"
+    "vite": "^8.2.2"
   }
 }

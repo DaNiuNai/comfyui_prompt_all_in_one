@@ -1,0 +1,28 @@
+{
+  "PromptAllInOne_Positive": {
+    "display_name": "提示词全能编辑器 · 正向",
+    "description": "在提示词全能编辑器侧边栏中编辑和管理正向提示词。",
+    "inputs": {
+      "prompt": {
+        "display_name": "提示词",
+        "tooltip": "选择节点后打开提示词侧边栏进行编辑。"
+      }
+    },
+    "outputs": {
+      "prompt": { "display_name": "字符串" }
+    }
+  },
+  "PromptAllInOne_Negative": {
+    "display_name": "提示词全能编辑器 · 负向",
+    "description": "在提示词全能编辑器侧边栏中编辑和管理负向提示词。",
+    "inputs": {
+      "prompt": {
+        "display_name": "提示词",
+        "tooltip": "选择节点后打开提示词侧边栏进行编辑。"
+      }
+    },
+    "outputs": {
+      "prompt": { "display_name": "字符串" }
+    }
+  }
+}

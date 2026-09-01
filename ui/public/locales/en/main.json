@@ -1,24 +1,93 @@
 {
-  "app": {
-    "title": "React Example Extension",
-    "description": "Shows statistics about nodes in the current workflow",
-    "noNodes": "No nodes in the workflow",
-    "nodeList": {
-      "title": "Node List",
-      "id": "ID",
-      "type": "Type",
-      "category": "Category",
-      "inputs": "Inputs",
-      "outputs": "Outputs"
-    },
-    "nodeStats": {
-      "title": "Node Statistics",
-      "totalNodes": "Total nodes",
-      "uniqueNodeTypes": "Unique node types"
-    },
-    "footer": {
-      "clickToHighlight": "Click on any node in the list to highlight it in the workflow"
-    }
+  "app": { "title": "Prompt All in One" },
+  "common": {
+    "add": "Add",
+    "copy": "Copy prompt",
+    "delete": "Delete",
+    "disable": "Disable",
+    "enable": "Enable",
+    "favorite": "Favorite",
+    "format": "Format and deduplicate",
+    "loading": "Loading the prompt editor…",
+    "select": "Select tag",
+    "selectAll": "Select all / clear",
+    "translate": "Translate",
+    "working": "Working…"
   },
-  "Click on any node in the list to highlight it in the workflow": "Click on any node in the list to highlight it in the workflow"
+  "tabs": {
+    "editor": "Editor",
+    "words": "Word library",
+    "history": "History",
+    "favorites": "Favorites",
+    "ai": "AI generation",
+    "settings": "Settings"
+  },
+  "node": {
+    "positive": "Positive · {{title}} #{{id}}",
+    "negative": "Negative · {{title}} #{{id}}",
+    "none": "No prompt node selected",
+    "selectHint": "Select a Prompt All in One positive or negative node on the canvas. Ordinary STRING nodes are never modified."
+  },
+  "editor": {
+    "rawPrompt": "Prompt text",
+    "placeholder": "Enter comma-separated prompt tags",
+    "addPlaceholder": "Add one or more tags",
+    "batchTools": "Batch tools",
+    "empty": "The prompt is empty",
+    "counts": "{{tags}} tags · {{characters}} characters",
+    "weightDown": "Decrease weight",
+    "weightUp": "Increase weight",
+    "wrap": "Wrap with {{wrapper}}",
+    "useTranslation": "Replace the tag with this translation"
+  },
+  "library": {
+    "search": "Search English or translated prompt words",
+    "resultLimit": "Only the first 400 results are shown. Enter a query to narrow the list."
+  },
+  "collections": {
+    "history": "Edit history",
+    "favorites": "Favorites",
+    "untitled": "Untitled",
+    "empty": "No records yet"
+  },
+  "models": {
+    "found": "Found in the ComfyUI model directories",
+    "missing": "Resource not found; LoRAs must still be loaded with a LoRA Loader"
+  },
+  "settings": {
+    "interface": "Interface",
+    "interfaceLanguage": "Interface and word-library language",
+    "prompt": "Prompt formatting",
+    "separator": "Tag separator",
+    "normalizeSpaces": "Normalize separator spaces",
+    "trailingComma": "Keep a trailing comma",
+    "blacklist": "Blacklist (one per line or comma-separated)",
+    "translation": "Online translation",
+    "provider": "Translation provider",
+    "sourceLanguage": "Source language",
+    "targetLanguage": "Target language",
+    "secretConfigured": "Configured; leave blank to preserve the existing secret",
+    "saveService": "Save service configuration",
+    "ai": "OpenAI-compatible AI service",
+    "api_base": "API base URL",
+    "model": "Model",
+    "api_key": "API key",
+    "importTitle": "Import legacy data",
+    "importHint": "Choose the old storage folder. Only supported JSON files are uploaded; translation and AI keys are never imported.",
+    "previewImport": "Preview import",
+    "commitImport": "Commit import",
+    "importSummary": "{{accepted}} importable, {{skipped}} skipped, {{invalid}} invalid, and {{settings}} settings."
+  },
+  "ai": {
+    "request": "Describe the image you want to generate",
+    "placeholder": "For example: a cinematic portrait on a rainy Tokyo street",
+    "generate": "Generate prompt",
+    "use": "Append to the current prompt"
+  },
+  "messages": {
+    "copied": "Prompt copied",
+    "favorited": "Added to favorites",
+    "saved": "Settings saved",
+    "translated": "Translation complete"
+  }
 }
