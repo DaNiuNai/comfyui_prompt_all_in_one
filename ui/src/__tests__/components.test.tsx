@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react'
 
 import { GroupLibrary } from '../components/GroupLibrary'
+import { SettingsPanel } from '../components/SettingsPanel'
 import { TagEditor } from '../components/TagEditor'
 import { Settings } from '../types'
 import { documentFromPrompt } from '../utils/prompt'
@@ -18,6 +19,7 @@ const settings: Settings = {
   translate_provider: 'myMemory_free',
   source_language: 'zh_CN',
   target_language: 'en_US',
+  preserve_translation_case: false,
   auto_remove_space: true,
   trailing_comma: false,
   separator: ', ',
@@ -91,6 +93,19 @@ describe('TagEditor', () => {
     )
 
     expect(onTranslate).toHaveBeenCalledWith([document.tags[1].id])
+  })
+
+  it('restores and clears the original text shown below a translated tag', () => {
+    const document = documentFromPrompt('test')
+    document.tags[0].translation = '测试'
+    const onChange = jest.fn()
+    renderEditor({ document, onChange })
+
+    fireEvent.click(screen.getByRole('button', { name: '测试' }))
+
+    const changedDocument = onChange.mock.calls[0]?.[0]
+    expect(changedDocument.tags[0].text).toBe('测试')
+    expect(changedDocument.tags[0].translation).toBeUndefined()
   })
 
   it('uses the configured click and double-click gestures', () => {
@@ -260,5 +275,47 @@ describe('GroupLibrary', () => {
     expect(
       screen.queryByRole('button', { name: /1boy/ })
     ).not.toBeInTheDocument()
+  })
+})
+
+describe('SettingsPanel', () => {
+  it('saves the translation casing preference', () => {
+    const onSaveSettings = jest.fn().mockResolvedValue(undefined)
+    render(
+      <SettingsPanel
+        settings={settings}
+        providers={[
+          {
+            key: 'myMemory_free',
+            name: 'MyMemory',
+            group: 'Free',
+            free: true,
+            config: [],
+            languages: ['zh_CN', 'en_US']
+          }
+        ]}
+        credentials={{}}
+        busy={false}
+        onSaveSettings={onSaveSettings}
+        onSaveCredentials={jest.fn().mockResolvedValue(undefined)}
+        onImport={jest.fn().mockResolvedValue({
+          accepted: 0,
+          skipped: 0,
+          invalid: 0,
+          settings: 0
+        })}
+        onReload={jest.fn().mockResolvedValue(undefined)}
+      />
+    )
+
+    fireEvent.click(
+      screen.getByRole('checkbox', {
+        name: 'settings.preserveTranslationCase'
+      })
+    )
+
+    expect(onSaveSettings).toHaveBeenCalledWith({
+      preserve_translation_case: true
+    })
   })
 })

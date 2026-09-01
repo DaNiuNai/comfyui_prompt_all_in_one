@@ -45,7 +45,7 @@
     "weightDown": "降低权重",
     "weightUp": "提高权重",
     "wrap": "使用 {{wrapper}} 包裹",
-    "useTranslation": "使用此译文替换原标签"
+    "restoreOriginal": "恢复翻译前的原文"
   },
   "library": {
     "search": "搜索英文或中文提示词",
@@ -86,6 +86,7 @@
     "provider": "翻译服务",
     "sourceLanguage": "源语言",
     "targetLanguage": "目标语言",
+    "preserveTranslationCase": "保留翻译结果的原始大小写",
     "secretConfigured": "已配置；留空可保留现有密钥",
     "saveService": "保存服务配置",
     "ai": "兼容 OpenAI 的 AI 服务",

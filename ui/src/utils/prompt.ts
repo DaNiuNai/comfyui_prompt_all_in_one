@@ -142,6 +142,28 @@ export function serializeDocument(
   return prompt && settings.trailing_comma ? `${prompt.trimEnd()},` : prompt
 }
 
+export function replaceTranslatedTags(
+  document: PromptDocument,
+  translations: ReadonlyMap<string, string>,
+  preserveCase = false
+): PromptDocument {
+  return {
+    version: 1,
+    tags: document.tags.map((tag) => {
+      const translated = translations.get(tag.id)
+      if (translated === undefined || !translated.trim()) return tag
+      const translatedText = preserveCase
+        ? translated
+        : translated.toLowerCase()
+      return {
+        ...tag,
+        text: translatedText,
+        translation: translatedText === tag.text ? undefined : tag.text
+      }
+    })
+  }
+}
+
 export function reconcilePromptDocument(
   stored: unknown,
   prompt: string,

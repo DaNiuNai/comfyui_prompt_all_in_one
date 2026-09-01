@@ -41,20 +41,24 @@ def _translate_sync(texts: list[str], provider: str, from_lang: str, to_lang: st
             import translators as ts
         except ImportError as exc:
             raise ServiceError("The translators dependency is not installed") from exc
-        translator = provider_item.get("translator")
-        source = provider_item.get("support", {}).get(from_lang, from_lang)
-        target = provider_item.get("support", {}).get(to_lang, to_lang)
-        results: list[str] = []
-        for text in texts:
-            result = ts.translate_text(
-                text,
-                translator=translator,
-                from_language=source,
-                to_language=target,
-                timeout=30,
-            )
-            results.append(str(result))
-        return results
+        try:
+            translator = provider_item.get("translator")
+            source = provider_item.get("support", {}).get(from_lang, from_lang)
+            target = provider_item.get("support", {}).get(to_lang, to_lang)
+            results: list[str] = []
+            for text in texts:
+                result = ts.translate_text(
+                    text,
+                    translator=translator,
+                    from_language=source,
+                    to_language=target,
+                    timeout=30,
+                )
+                results.append(str(result))
+            return results
+        except Exception as exc:
+            message = str(exc).strip() or exc.__class__.__name__
+            raise ServiceError(message[:500]) from exc
     mapping = PROVIDER_CLASSES.get(provider)
     if mapping is None:
         raise ServiceError("Translation provider is not available")

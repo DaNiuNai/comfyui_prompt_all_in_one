@@ -261,10 +261,13 @@ function SortableTag({
           <button
             type="button"
             className="paio-translation"
-            title={t('editor.useTranslation')}
+            title={t('editor.restoreOriginal')}
             onClick={(event) => {
               event.stopPropagation()
-              onUpdate({ text: tag.translation ?? tag.text })
+              onUpdate({
+                text: tag.translation ?? tag.text,
+                translation: undefined
+              })
             }}
           >
             {tag.translation}

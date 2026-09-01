@@ -49,6 +49,7 @@ import {
   formatDocument,
   isPromptDocument,
   reconcilePromptDocument,
+  replaceTranslatedTags,
   serializeDocument
 } from './utils/prompt'
 
@@ -305,13 +306,13 @@ function App() {
       const translated = new Map(
         tags.map((tag, index) => [tag.id, response.texts[index]])
       )
-      updateDocument({
-        version: 1,
-        tags: document.tags.map((tag) => ({
-          ...tag,
-          translation: translated.get(tag.id) ?? tag.translation
-        }))
-      })
+      updateDocument(
+        replaceTranslatedTags(
+          documentRef.current,
+          translated,
+          data.settings.preserve_translation_case
+        )
+      )
       notify('success', t('messages.translated'))
     } catch (reason) {
       notify('error', reason instanceof Error ? reason.message : String(reason))

@@ -74,6 +74,7 @@ export interface Settings {
   translate_provider: string
   source_language: string
   target_language: string
+  preserve_translation_case: boolean
   auto_remove_space: boolean
   trailing_comma: boolean
   separator: string

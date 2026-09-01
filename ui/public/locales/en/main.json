@@ -45,7 +45,7 @@
     "weightDown": "Decrease weight",
     "weightUp": "Increase weight",
     "wrap": "Wrap with {{wrapper}}",
-    "useTranslation": "Replace the tag with this translation"
+    "restoreOriginal": "Restore the text from before translation"
   },
   "library": {
     "search": "Search English or translated prompt words",
@@ -86,6 +86,7 @@
     "provider": "Translation provider",
     "sourceLanguage": "Source language",
     "targetLanguage": "Target language",
+    "preserveTranslationCase": "Preserve the translation result's original letter case",
     "secretConfigured": "Configured; leave blank to preserve the existing secret",
     "saveService": "Save service configuration",
     "ai": "OpenAI-compatible AI service",

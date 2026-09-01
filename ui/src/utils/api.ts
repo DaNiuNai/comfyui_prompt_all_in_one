@@ -21,7 +21,23 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (init?.body && !(init.body instanceof FormData))
     headers.set('Content-Type', 'application/json')
   const response = await api.fetchApi(`${PREFIX}${path}`, { ...init, headers })
-  const payload = (await response.json()) as ApiEnvelope<T>
+  const responseText = await response.text()
+  let payload: ApiEnvelope<T>
+  try {
+    const parsed: unknown = JSON.parse(responseText)
+    if (typeof parsed !== 'object' || parsed === null)
+      throw new SyntaxError('Response is not a JSON object')
+    payload = parsed as ApiEnvelope<T>
+  } catch {
+    const status = response.statusText
+      ? `${response.status}: ${response.statusText}`
+      : String(response.status)
+    throw new Error(
+      response.ok
+        ? 'Server returned an invalid response'
+        : `Request failed (${status})`
+    )
+  }
   if (!response.ok || !payload.success || payload.data === undefined) {
     throw new Error(
       payload.error?.message || `Request failed (${response.status})`

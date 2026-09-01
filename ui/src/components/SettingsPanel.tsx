@@ -252,6 +252,20 @@ export function SettingsPanel({
           </select>
         </label>
       </div>
+      <div className="paio-check-row">
+        <label>
+          <input
+            type="checkbox"
+            checked={settings.preserve_translation_case}
+            onChange={(event) =>
+              void onSaveSettings({
+                preserve_translation_case: event.target.checked
+              })
+            }
+          />
+          {t('settings.preserveTranslationCase')}
+        </label>
+      </div>
       {provider?.config.map((field) => (
         <label className="paio-field" key={field.key}>
           <span>{field.name}</span>

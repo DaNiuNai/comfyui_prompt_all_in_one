@@ -7,6 +7,7 @@ import {
   isPromptDocument,
   modelReferenceState,
   reconcilePromptDocument,
+  replaceTranslatedTags,
   serializeDocument,
   splitPrompt
 } from '../utils/prompt'
@@ -17,6 +18,7 @@ const settings: Settings = {
   translate_provider: 'myMemory_free',
   source_language: 'zh_CN',
   target_language: 'en_US',
+  preserve_translation_case: false,
   auto_remove_space: true,
   trailing_comma: false,
   separator: ', ',
@@ -165,6 +167,32 @@ describe('prompt parsing', () => {
         tags: [{ ...legacy.tags[0], lineBreakBefore: 'invalid' }]
       })
     ).toBe(false)
+  })
+
+  it('replaces translated tag text and keeps the original as secondary text', () => {
+    const document = documentFromPrompt('测试, second')
+
+    const translated = replaceTranslatedTags(
+      document,
+      new Map([[document.tags[0].id, 'TEST Result']])
+    )
+
+    expect(serializeDocument(translated, settings)).toBe('test result, second')
+    expect(translated.tags[0].translation).toBe('测试')
+    expect(translated.tags[1]).toBe(document.tags[1])
+  })
+
+  it('preserves translated tag casing when requested', () => {
+    const document = documentFromPrompt('测试')
+
+    const translated = replaceTranslatedTags(
+      document,
+      new Map([[document.tags[0].id, 'TEST Result']]),
+      true
+    )
+
+    expect(serializeDocument(translated, settings)).toBe('TEST Result')
+    expect(translated.tags[0].translation).toBe('测试')
   })
 })
 
