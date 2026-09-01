@@ -6,6 +6,7 @@ import {
   formatDocument,
   isPromptDocument,
   modelReferenceState,
+  reconcilePromptDocument,
   serializeDocument,
   splitPrompt
 } from '../utils/prompt'
@@ -77,6 +78,32 @@ describe('prompt parsing', () => {
     expect(
       serializeDocument(document, { ...settings, blacklist: ['blurry'] })
     ).toBe('masterpiece')
+  })
+
+  it('keeps disabled tags when reconciling the serialized widget prompt', () => {
+    const document = documentFromPrompt('first, second')
+    document.tags[1].enabled = false
+
+    const reconciled = reconcilePromptDocument(
+      document,
+      serializeDocument(document, settings),
+      settings
+    )
+
+    expect(reconciled).toBe(document)
+    expect(reconciled.tags).toHaveLength(2)
+    expect(reconciled.tags[1].enabled).toBe(false)
+  })
+
+  it('rebuilds the document after an external widget prompt edit', () => {
+    const document = documentFromPrompt('first, second')
+    document.tags[1].enabled = false
+
+    const reconciled = reconcilePromptDocument(document, 'third', settings)
+
+    expect(reconciled).not.toBe(document)
+    expect(reconciled.tags.map((tag) => tag.text)).toEqual(['third'])
+    expect(reconciled.tags[0].enabled).toBe(true)
   })
 
   it('carries a filtered line boundary to the next enabled tag', () => {

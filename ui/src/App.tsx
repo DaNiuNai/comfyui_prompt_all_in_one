@@ -48,6 +48,7 @@ import {
   documentFromPrompt,
   formatDocument,
   isPromptDocument,
+  reconcilePromptDocument,
   serializeDocument
 } from './utils/prompt'
 
@@ -230,8 +231,19 @@ function App() {
     }
     const updateNode = (event: Event) => {
       const next = (event as CustomEvent<PromptNode | null>).detail
-      if (next?.id !== nodeRef.current?.id) return
-      const nextDocument = documentForNode(next, true)
+      if (!next || next.id !== nodeRef.current?.id) return
+      const currentData = dataRef.current
+      const nextDocument = currentData
+        ? reconcilePromptDocument(
+            next.properties?.promptAllInOneDocument,
+            promptWidgetValue(next),
+            currentData.settings
+          )
+        : documentForNode(next, true)
+      next.properties = {
+        ...(next.properties ?? {}),
+        promptAllInOneDocument: nextDocument
+      }
       setDocument(nextDocument)
       documentRef.current = nextDocument
     }

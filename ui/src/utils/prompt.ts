@@ -142,6 +142,19 @@ export function serializeDocument(
   return prompt && settings.trailing_comma ? `${prompt.trimEnd()},` : prompt
 }
 
+export function reconcilePromptDocument(
+  stored: unknown,
+  prompt: string,
+  settings: Settings
+): PromptDocument {
+  if (
+    isPromptDocument(stored) &&
+    serializeDocument(stored, settings) === prompt
+  )
+    return stored
+  return documentFromPrompt(prompt)
+}
+
 export function filterTagsPreservingLineBreaks(
   tags: PromptTag[],
   keep: (tag: PromptTag, index: number) => boolean
