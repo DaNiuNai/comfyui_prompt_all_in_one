@@ -15,6 +15,7 @@ export interface PromptTag {
   text: string
   translation?: string
   enabled: boolean
+  lineBreakBefore?: boolean
 }
 
 export interface PromptDocument {
@@ -56,9 +57,15 @@ export interface GroupTagGroup {
   tags: Record<string, string | null>
 }
 
+export interface GroupTagWrap {
+  type: 'wrap'
+}
+
+export type GroupTagEntry = GroupTagGroup | GroupTagWrap
+
 export interface GroupTagCategory {
   name: string
-  groups: GroupTagGroup[]
+  groups: GroupTagEntry[]
 }
 
 export interface Settings {

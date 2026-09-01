@@ -10,28 +10,42 @@ const BRACKETS: Record<string, string> = {
 
 let nextTagId = 0
 
-export function createTag(text: string): PromptTag {
+interface PromptPart {
+  text: string
+  lineBreakBefore: boolean
+}
+
+export function createTag(text: string, lineBreakBefore = false): PromptTag {
   nextTagId += 1
-  return {
+  const tag: PromptTag = {
     id: `tag-${Date.now()}-${nextTagId}`,
     text: text.trim(),
     enabled: true
   }
+  if (lineBreakBefore) tag.lineBreakBefore = true
+  return tag
 }
 
-export function splitPrompt(input: string): string[] {
+function promptParts(input: string): PromptPart[] {
   const source = input
     .replace(NORMALIZED_SEPARATORS, ',')
     .replace(/\t|\r/g, '\n')
     .replace(/\n+/g, '\n')
-  const result: string[] = []
+  const result: PromptPart[] = []
   const stack: string[] = []
   let buffer = ''
   let escaped = false
+  let lineBreakBeforeNext = false
 
   const flush = () => {
     const value = buffer.trim()
-    if (value) result.push(value)
+    if (value) {
+      result.push({
+        text: value,
+        lineBreakBefore: result.length > 0 && lineBreakBeforeNext
+      })
+      lineBreakBeforeNext = false
+    }
     buffer = ''
   }
 
@@ -58,20 +72,26 @@ export function splitPrompt(input: string): string[] {
     }
     if ((character === ',' || character === '\n') && stack.length === 0) {
       flush()
-      if (character === '\n' && result[result.length - 1] !== 'BREAK')
-        result.push('BREAK')
+      if (character === '\n' && result.length > 0) lineBreakBeforeNext = true
       continue
     }
     buffer += character
   }
   flush()
-  return result.filter(
-    (value, index) => value !== 'BREAK' || result[index - 1] !== 'BREAK'
-  )
+  return result
+}
+
+export function splitPrompt(input: string): string[] {
+  return promptParts(input).map((part) => part.text)
 }
 
 export function documentFromPrompt(prompt: string): PromptDocument {
-  return { version: 1, tags: splitPrompt(prompt).map(createTag) }
+  return {
+    version: 1,
+    tags: promptParts(prompt).map((part) =>
+      createTag(part.text, part.lineBreakBefore)
+    )
+  }
 }
 
 export function isPromptDocument(value: unknown): value is PromptDocument {
@@ -85,7 +105,9 @@ export function isPromptDocument(value: unknown): value is PromptDocument {
         tag &&
         typeof tag.id === 'string' &&
         typeof tag.text === 'string' &&
-        typeof tag.enabled === 'boolean'
+        typeof tag.enabled === 'boolean' &&
+        (tag.lineBreakBefore === undefined ||
+          typeof tag.lineBreakBefore === 'boolean')
     )
   )
 }
@@ -97,29 +119,64 @@ export function serializeDocument(
   const blacklist = new Set(
     settings.blacklist.map((item) => item.trim().toLowerCase())
   )
-  const values = document.tags
-    .filter((tag) => tag.enabled && tag.text.trim())
-    .map((tag) => tag.text.trim())
-    .filter((tag) => !blacklist.has(unwrapWeight(tag).toLowerCase()))
   const separator = settings.auto_remove_space
     ? settings.separator.trimEnd() + ' '
     : settings.separator
-  const prompt = values.join(separator)
+  let prompt = ''
+  let pendingLineBreak = false
+
+  document.tags.forEach((tag) => {
+    if (tag.lineBreakBefore) pendingLineBreak = true
+    const value = tag.text.trim()
+    if (
+      !tag.enabled ||
+      !value ||
+      blacklist.has(unwrapWeight(value).toLowerCase())
+    )
+      return
+    if (prompt) prompt += pendingLineBreak ? '\n' : separator
+    prompt += value
+    pendingLineBreak = false
+  })
+
   return prompt && settings.trailing_comma ? `${prompt.trimEnd()},` : prompt
+}
+
+export function filterTagsPreservingLineBreaks(
+  tags: PromptTag[],
+  keep: (tag: PromptTag, index: number) => boolean
+): PromptTag[] {
+  const result: PromptTag[] = []
+  let pendingLineBreak = false
+
+  tags.forEach((tag, index) => {
+    if (tag.lineBreakBefore) pendingLineBreak = true
+    if (!keep(tag, index)) return
+
+    const next = { ...tag }
+    if (result.length > 0 && pendingLineBreak) next.lineBreakBefore = true
+    else delete next.lineBreakBefore
+    result.push(next)
+    pendingLineBreak = false
+  })
+
+  return result
 }
 
 export function formatDocument(document: PromptDocument): PromptDocument {
   const seen = new Set<string>()
+  const formatted = document.tags.map((tag) => ({
+    ...tag,
+    text: tag.text.trim().replace(/\s+/g, ' ')
+  }))
   return {
     version: 1,
-    tags: document.tags
-      .map((tag) => ({ ...tag, text: tag.text.trim().replace(/\s+/g, ' ') }))
-      .filter((tag) => {
-        const key = tag.text.toLowerCase()
-        if (!key || seen.has(key)) return false
-        seen.add(key)
-        return true
-      })
+    tags: filterTagsPreservingLineBreaks(formatted, (tag) => {
+      const key = tag.text.toLowerCase()
+      if (!key || seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
   }
 }
 

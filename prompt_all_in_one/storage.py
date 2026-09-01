@@ -17,9 +17,9 @@ MAX_HISTORY = 100
 MAX_FAVORITES = 1000
 
 DEFAULT_HOTKEYS: dict[str, str] = {
-    "click": "edit",
-    "double_click": "disable",
-    "right_click": "extend",
+    "click": "none",
+    "double_click": "edit",
+    "right_click": "disable",
     "hover": "extend",
 }
 HOTKEY_ALIASES = {

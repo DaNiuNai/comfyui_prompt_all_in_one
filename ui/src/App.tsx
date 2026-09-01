@@ -40,6 +40,7 @@ import {
   Settings
 } from './types'
 import { promptApi } from './utils/api'
+import { isGroupTagGroup } from './utils/groupTags'
 import i18n from './utils/i18n'
 import { PanelState, loadPanelState, savePanelState } from './utils/panelState'
 import {
@@ -440,6 +441,7 @@ function App() {
     const result: Record<string, string> = {}
     data.group_tags.forEach((category) =>
       category.groups.forEach((group) => {
+        if (!isGroupTagGroup(group)) return
         const color =
           data.settings.group_tag_colors[`${category.name}||${group.name}`] ||
           group.color

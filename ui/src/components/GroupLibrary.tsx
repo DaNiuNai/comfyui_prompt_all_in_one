@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { GroupTagCategory } from '../types'
+import { isGroupTagGroup } from '../utils/groupTags'
 
 interface Props {
   categories: GroupTagCategory[]
@@ -31,7 +32,17 @@ export function GroupLibrary({
   )
   const [search, setSearch] = useState('')
   const category = categories[categoryIndex]
-  const group = category?.groups[groupIndex]
+  const selectableGroups = useMemo(
+    () =>
+      (category?.groups ?? []).flatMap((entry, index) =>
+        isGroupTagGroup(entry) ? [{ group: entry, index }] : []
+      ),
+    [category]
+  )
+  const selectedGroup =
+    selectableGroups.find((entry) => entry.index === groupIndex) ??
+    selectableGroups[0]
+  const group = selectedGroup?.group
   const tags = useMemo(() => {
     if (!group) return []
     const query = search.trim().toLowerCase()
@@ -56,9 +67,13 @@ export function GroupLibrary({
             className={index === categoryIndex ? 'active' : ''}
             key={`${item.name}-${index}`}
             onClick={() => {
+              const nextGroupIndex = Math.max(
+                0,
+                item.groups.findIndex(isGroupTagGroup)
+              )
               setCategoryIndex(index)
-              setGroupIndex(0)
-              onActiveChange(index, 0)
+              setGroupIndex(nextGroupIndex)
+              onActiveChange(index, nextGroupIndex)
             }}
           >
             {item.name}
@@ -66,18 +81,21 @@ export function GroupLibrary({
         ))}
       </div>
       <div className="paio-chip-row secondary">
-        {category?.groups.map((item, index) => (
-          <button
-            className={index === groupIndex ? 'active' : ''}
-            key={`${item.name}-${index}`}
-            onClick={() => {
-              setGroupIndex(index)
-              onActiveChange(categoryIndex, index)
-            }}
-          >
-            {item.name}
-          </button>
-        ))}
+        {category?.groups.map((item, index) => {
+          if (!isGroupTagGroup(item)) return null
+          return (
+            <button
+              className={index === selectedGroup?.index ? 'active' : ''}
+              key={`${item.name}-${index}`}
+              onClick={() => {
+                setGroupIndex(index)
+                onActiveChange(categoryIndex, index)
+              }}
+            >
+              {item.name}
+            </button>
+          )
+        })}
       </div>
       <div className="paio-word-grid">
         {tags.map(([english, local]) => (

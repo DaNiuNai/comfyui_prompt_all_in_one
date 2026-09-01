@@ -42,6 +42,7 @@ import { HotkeyAction, PromptDocument, PromptTag, Settings } from '../types'
 import {
   adjustWeight,
   documentFromPrompt,
+  filterTagsPreservingLineBreaks,
   modelReferenceState,
   serializeDocument,
   wrapTag
@@ -388,6 +389,11 @@ export function TagEditor({
     () => serializeDocument(document, settings),
     [document, settings]
   )
+  const [rawPrompt, setRawPrompt] = useState(prompt)
+
+  useEffect(() => {
+    setRawPrompt(prompt)
+  }, [prompt])
 
   useEffect(() => {
     const ids = new Set(document.tags.map((tag) => tag.id))
@@ -407,6 +413,15 @@ export function TagEditor({
   }, [contextMenu])
 
   const changeTags = (tags: PromptTag[]) => onChange({ version: 1, tags })
+
+  const commitRawPrompt = () => {
+    if (rawPrompt !== prompt) {
+      const next = documentFromPrompt(rawPrompt)
+      setRawPrompt(serializeDocument(next, settings))
+      onChange(next)
+    }
+    onCommit()
+  }
 
   const updateTag = (id: string, updates: Partial<PromptTag>) =>
     changeTags(
@@ -429,7 +444,9 @@ export function TagEditor({
 
   const removeIds = (ids: ReadonlySet<string>) => {
     if (!ids.size) return
-    changeTags(document.tags.filter((tag) => !ids.has(tag.id)))
+    changeTags(
+      filterTagsPreservingLineBreaks(document.tags, (tag) => !ids.has(tag.id))
+    )
     setSelected((current) => new Set([...current].filter((id) => !ids.has(id))))
   }
 
@@ -608,10 +625,21 @@ export function TagEditor({
       {rawExpanded && (
         <textarea
           className="paio-raw-prompt"
-          value={prompt}
+          value={rawPrompt}
           rows={4}
-          onChange={(event) => onChange(documentFromPrompt(event.target.value))}
-          onBlur={onCommit}
+          onChange={(event) => setRawPrompt(event.target.value)}
+          onBlur={commitRawPrompt}
+          onKeyDown={(event) => {
+            event.stopPropagation()
+            if (
+              event.key !== 'Enter' ||
+              (!event.ctrlKey && !event.metaKey) ||
+              event.nativeEvent.isComposing
+            )
+              return
+            event.preventDefault()
+            commitRawPrompt()
+          }}
           placeholder={t('editor.placeholder')}
         />
       )}
@@ -823,7 +851,7 @@ export function TagEditor({
       <footer className="paio-counts">
         {t('editor.counts', {
           tags: document.tags.length,
-          characters: prompt.length
+          characters: rawPrompt.length
         })}
       </footer>
     </section>

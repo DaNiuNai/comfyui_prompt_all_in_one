@@ -19,6 +19,16 @@ describe('tag interactions', () => {
     expect(result.map((tag) => tag.text)).toEqual(['a', 'd', 'b', 'c'])
   })
 
+  it('moves a line boundary with the first tag on that line', () => {
+    const tags = documentFromPrompt('a\nb, c').tags
+
+    const result = reorderTags(tags, tags[1].id, tags[2].id, new Set())
+
+    expect(result.map((tag) => tag.text)).toEqual(['a', 'c', 'b'])
+    expect(result[1].lineBreakBefore).toBeUndefined()
+    expect(result[2].lineBreakBefore).toBe(true)
+  })
+
   it('detects marquee intersection at touching edges', () => {
     expect(
       rectanglesIntersect(

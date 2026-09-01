@@ -24,6 +24,17 @@ def test_settings_are_allowlisted_and_persisted(tmp_path: Path) -> None:
         storage.update_settings({"api_key": "must-not-be-a-setting"})
 
 
+def test_default_tag_gestures_match_the_panel_defaults(tmp_path: Path) -> None:
+    settings = UserStorage(tmp_path).get_settings()
+
+    assert settings["hotkeys"] == {
+        "click": "none",
+        "double_click": "edit",
+        "right_click": "disable",
+        "hover": "extend",
+    }
+
+
 def test_hotkeys_are_deep_merged_and_legacy_keys_are_normalized(tmp_path: Path) -> None:
     storage = UserStorage(tmp_path)
 
