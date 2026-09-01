@@ -23,7 +23,7 @@ class _PromptNode(io.ComfyNode):
                     default="",
                     multiline=True,
                     dynamic_prompts=True,
-                    placeholder="Select this node and open Prompt All in One in the sidebar.",
+                    placeholder="Use Open Prompt Editor on this node to edit in the floating panel.",
                 )
             ],
             outputs=[io.String.Output("prompt", display_name="STRING")],
@@ -37,10 +37,10 @@ class _PromptNode(io.ComfyNode):
 class PositivePromptNode(_PromptNode):
     node_id = "PromptAllInOne_Positive"
     display_name = "Prompt All in One · Positive"
-    description = "Build and manage a positive prompt in the Prompt All in One sidebar."
+    description = "Build and manage a positive prompt in the floating Prompt All in One editor."
 
 
 class NegativePromptNode(_PromptNode):
     node_id = "PromptAllInOne_Negative"
     display_name = "Prompt All in One · Negative"
-    description = "Build and manage a negative prompt in the Prompt All in One sidebar."
+    description = "Build and manage a negative prompt in the floating Prompt All in One editor."

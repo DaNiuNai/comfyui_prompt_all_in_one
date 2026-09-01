@@ -5,7 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from prompt_all_in_one.storage import MAX_HISTORY, StorageError, UserStorage
+from prompt_all_in_one.storage import (
+    DEFAULT_HOTKEYS,
+    MAX_HISTORY,
+    StorageError,
+    UserStorage,
+)
 
 
 def test_settings_are_allowlisted_and_persisted(tmp_path: Path) -> None:
@@ -17,6 +22,41 @@ def test_settings_are_allowlisted_and_persisted(tmp_path: Path) -> None:
     assert UserStorage(tmp_path / "user-a").get_settings()["blacklist"] == ["blurry"]
     with pytest.raises(StorageError, match="Unknown settings"):
         storage.update_settings({"api_key": "must-not-be-a-setting"})
+
+
+def test_hotkeys_are_deep_merged_and_legacy_keys_are_normalized(tmp_path: Path) -> None:
+    storage = UserStorage(tmp_path)
+
+    settings = storage.update_settings(
+        {
+            "hotkeys": {
+                "click": "",
+                "dblClick": "edit",
+                "rightClick": "disable",
+                "unknown": "extend",
+            }
+        }
+    )
+
+    assert settings["hotkeys"] == {
+        **DEFAULT_HOTKEYS,
+        "click": "none",
+        "double_click": "edit",
+        "right_click": "disable",
+    }
+
+    storage.update_settings({"hotkeys": {"click": "edit"}})
+    reloaded = UserStorage(tmp_path).get_settings()["hotkeys"]
+    assert reloaded["click"] == "edit"
+    assert reloaded["double_click"] == "edit"
+    assert reloaded["hover"] == "extend"
+
+
+def test_hotkeys_must_be_an_object(tmp_path: Path) -> None:
+    storage = UserStorage(tmp_path)
+
+    with pytest.raises(StorageError, match="hotkeys must be an object"):
+        storage.update_settings({"hotkeys": "edit"})
 
 
 def test_history_deduplicates_adjacent_prompts_and_enforces_limit(tmp_path: Path) -> None:

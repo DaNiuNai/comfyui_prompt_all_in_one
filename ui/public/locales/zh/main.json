@@ -2,10 +2,14 @@
   "app": { "title": "提示词全能编辑器" },
   "common": {
     "add": "添加",
+    "clearSelection": "清除选择",
+    "close": "关闭",
     "copy": "复制提示词",
     "delete": "删除",
     "disable": "禁用",
+    "edit": "编辑",
     "enable": "启用",
+    "enableDisable": "启用/禁用",
     "favorite": "收藏",
     "format": "格式化并去重",
     "loading": "正在载入提示词编辑器…",
@@ -25,14 +29,17 @@
   "node": {
     "positive": "正向 · {{title}} #{{id}}",
     "negative": "负向 · {{title}} #{{id}}",
-    "none": "尚未选择提示词节点",
-    "selectHint": "请在画布中选择 Prompt All in One 正向或负向节点。普通 STRING 节点不会被修改。"
+    "none": "尚未绑定提示词节点",
+    "selectHint": "请点击 Prompt All in One 正向或负向节点内的“打开提示词编辑器”按钮。",
+    "lockHint": "窗口会锁定到显式打开的节点，普通画布选择不会切换编辑目标。"
   },
   "editor": {
     "rawPrompt": "提示词文本",
     "placeholder": "输入以逗号分隔的提示词",
     "addPlaceholder": "添加一个或多个标签",
     "batchTools": "批量工具",
+    "tagTools": "标签工具",
+    "selectedCount": "已选择 {{count}} 项",
     "empty": "当前提示词为空",
     "counts": "{{tags}} 个标签 · {{characters}} 个字符",
     "weightDown": "降低权重",
@@ -62,6 +69,19 @@
     "normalizeSpaces": "规范分隔符空格",
     "trailingComma": "保留末尾逗号",
     "blacklist": "黑名单（每行或逗号分隔）",
+    "gestures": "标签手势",
+    "gesture": {
+      "click": "单击标签",
+      "doubleClick": "双击标签",
+      "rightClick": "右键标签",
+      "hover": "悬浮标签",
+      "action": {
+        "none": "无操作",
+        "edit": "编辑标签",
+        "disable": "启用/禁用标签",
+        "extend": "显示操作菜单"
+      }
+    },
     "translation": "在线翻译",
     "provider": "翻译服务",
     "sourceLanguage": "源语言",

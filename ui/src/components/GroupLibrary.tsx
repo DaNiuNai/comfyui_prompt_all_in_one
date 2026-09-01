@@ -7,7 +7,8 @@ interface Props {
   categories: GroupTagCategory[]
   colors: Record<string, string>
   activeGroup: Record<string, unknown>
-  onAdd: (english: string) => void
+  selectedTexts: ReadonlySet<string>
+  onToggle: (english: string) => void
   onActiveChange: (categoryIndex: number, groupIndex: number) => void
 }
 
@@ -15,7 +16,8 @@ export function GroupLibrary({
   categories,
   colors,
   activeGroup,
-  onAdd,
+  selectedTexts,
+  onToggle,
   onActiveChange
 }: Props) {
   const { t } = useTranslation()
@@ -81,7 +83,9 @@ export function GroupLibrary({
         {tags.map(([english, local]) => (
           <button
             key={english}
-            onClick={() => onAdd(english)}
+            className={selectedTexts.has(english) ? 'active' : ''}
+            aria-pressed={selectedTexts.has(english)}
+            onClick={() => onToggle(english)}
             style={{
               borderColor: group?.color || undefined,
               backgroundColor:

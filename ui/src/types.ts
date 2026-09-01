@@ -1,5 +1,14 @@
 export type Polarity = 'positive' | 'negative'
 export type CollectionKind = 'history' | 'favorites'
+export type Drawer = 'history' | 'favorites' | 'ai' | 'settings'
+export type HotkeyAction = 'none' | 'edit' | 'disable' | 'extend'
+
+export interface HotkeySettings {
+  click: HotkeyAction
+  double_click: HotkeyAction
+  right_click: HotkeyAction
+  hover: HotkeyAction
+}
 
 export interface PromptTag {
   id: string
@@ -65,7 +74,7 @@ export interface Settings {
   group_tags_translate: boolean
   group_tag_colors: Record<string, string>
   active_group: Record<string, unknown>
-  hotkeys: Record<string, string>
+  hotkeys: HotkeySettings
 }
 
 export interface BootstrapData {

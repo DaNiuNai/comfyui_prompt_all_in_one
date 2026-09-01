@@ -2,10 +2,14 @@
   "app": { "title": "Prompt All in One" },
   "common": {
     "add": "Add",
+    "clearSelection": "Clear selection",
+    "close": "Close",
     "copy": "Copy prompt",
     "delete": "Delete",
     "disable": "Disable",
+    "edit": "Edit",
     "enable": "Enable",
+    "enableDisable": "Enable / disable",
     "favorite": "Favorite",
     "format": "Format and deduplicate",
     "loading": "Loading the prompt editor…",
@@ -25,14 +29,17 @@
   "node": {
     "positive": "Positive · {{title}} #{{id}}",
     "negative": "Negative · {{title}} #{{id}}",
-    "none": "No prompt node selected",
-    "selectHint": "Select a Prompt All in One positive or negative node on the canvas. Ordinary STRING nodes are never modified."
+    "none": "No prompt node bound",
+    "selectHint": "Click Open Prompt Editor inside a Prompt All in One positive or negative node.",
+    "lockHint": "The window stays locked to the explicitly opened node; ordinary canvas selection does not retarget it."
   },
   "editor": {
     "rawPrompt": "Prompt text",
     "placeholder": "Enter comma-separated prompt tags",
     "addPlaceholder": "Add one or more tags",
     "batchTools": "Batch tools",
+    "tagTools": "Tag tools",
+    "selectedCount": "{{count}} selected",
     "empty": "The prompt is empty",
     "counts": "{{tags}} tags · {{characters}} characters",
     "weightDown": "Decrease weight",
@@ -62,6 +69,19 @@
     "normalizeSpaces": "Normalize separator spaces",
     "trailingComma": "Keep a trailing comma",
     "blacklist": "Blacklist (one per line or comma-separated)",
+    "gestures": "Tag gestures",
+    "gesture": {
+      "click": "Click tag",
+      "doubleClick": "Double-click tag",
+      "rightClick": "Right-click tag",
+      "hover": "Hover tag",
+      "action": {
+        "none": "No action",
+        "edit": "Edit tag",
+        "disable": "Enable / disable tag",
+        "extend": "Show action menu"
+      }
+    },
     "translation": "Online translation",
     "provider": "Translation provider",
     "sourceLanguage": "Source language",

@@ -70,3 +70,26 @@ def test_imports_only_non_sensitive_settings(tmp_path: Path) -> None:
         "subGroupTagsActive": "对象",
     }
     assert storage.get_credentials() == {}
+
+
+def test_import_normalizes_legacy_hotkeys(tmp_path: Path) -> None:
+    storage = UserStorage(tmp_path)
+
+    result = import_legacy(
+        storage,
+        [
+            (
+                "hotkey.json",
+                {"click": "edit", "dblClick": "disable", "rightClick": "extend"},
+            )
+        ],
+        commit=True,
+    )
+
+    assert result.settings == 1
+    assert storage.get_settings()["hotkeys"] == {
+        "click": "edit",
+        "double_click": "disable",
+        "right_click": "extend",
+        "hover": "extend",
+    }

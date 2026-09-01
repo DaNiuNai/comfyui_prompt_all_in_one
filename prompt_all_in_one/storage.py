@@ -16,6 +16,19 @@ SCHEMA_VERSION = 1
 MAX_HISTORY = 100
 MAX_FAVORITES = 1000
 
+DEFAULT_HOTKEYS: dict[str, str] = {
+    "click": "edit",
+    "double_click": "disable",
+    "right_click": "extend",
+    "hover": "extend",
+}
+HOTKEY_ALIASES = {
+    "dblClick": "double_click",
+    "doubleClick": "double_click",
+    "rightClick": "right_click",
+}
+HOTKEY_ACTIONS = frozenset({"none", "edit", "disable", "extend"})
+
 DEFAULT_SETTINGS: dict[str, Any] = {
     "schema_version": SCHEMA_VERSION,
     "language": "zh",
@@ -29,11 +42,7 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "group_tags_translate": True,
     "group_tag_colors": {},
     "active_group": {},
-    "hotkeys": {
-        "click": "edit",
-        "double_click": "disable",
-        "right_click": "none",
-    },
+    "hotkeys": DEFAULT_HOTKEYS,
 }
 
 ALLOWED_SETTINGS = frozenset(DEFAULT_SETTINGS) - {"schema_version"}
@@ -41,6 +50,21 @@ ALLOWED_SETTINGS = frozenset(DEFAULT_SETTINGS) - {"schema_version"}
 
 class StorageError(RuntimeError):
     pass
+
+
+def normalize_hotkeys(value: Any) -> dict[str, str]:
+    """Return the canonical, complete gesture mapping used by the frontend."""
+    normalized = deepcopy(DEFAULT_HOTKEYS)
+    if not isinstance(value, dict):
+        return normalized
+    for source_key, source_action in value.items():
+        key = HOTKEY_ALIASES.get(str(source_key), str(source_key))
+        if key not in DEFAULT_HOTKEYS:
+            continue
+        action = "none" if source_action == "" else str(source_action)
+        if action in HOTKEY_ACTIONS:
+            normalized[key] = action
+    return normalized
 
 
 class UserStorage:
@@ -107,12 +131,21 @@ class UserStorage:
         if not isinstance(stored, dict):
             stored = {}
         selected = {key: value for key, value in stored.items() if key in ALLOWED_SETTINGS}
-        return DEFAULT_SETTINGS | selected
+        settings = DEFAULT_SETTINGS | selected
+        settings["hotkeys"] = normalize_hotkeys(selected.get("hotkeys"))
+        return settings
 
     def update_settings(self, updates: dict[str, Any]) -> dict[str, Any]:
         unknown = set(updates) - ALLOWED_SETTINGS
         if unknown:
             raise StorageError(f"Unknown settings: {', '.join(sorted(unknown))}")
+        updates = deepcopy(updates)
+        if "hotkeys" in updates:
+            current_hotkeys = self.get_settings()["hotkeys"]
+            incoming = updates["hotkeys"]
+            if not isinstance(incoming, dict):
+                raise StorageError("hotkeys must be an object")
+            updates["hotkeys"] = normalize_hotkeys(current_hotkeys | incoming)
         settings = self.get_settings() | deepcopy(updates)
         settings["schema_version"] = SCHEMA_VERSION
         self._write("settings", settings)

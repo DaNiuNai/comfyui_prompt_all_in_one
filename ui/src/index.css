@@ -1,17 +1,20 @@
 #prompt-all-in-one-root {
-  --paio-bg: var(--comfy-menu-bg, #202124);
-  --paio-panel: color-mix(in srgb, var(--paio-bg) 82%, white 8%);
-  --paio-input: color-mix(in srgb, var(--paio-bg) 75%, black 14%);
-  --paio-text: var(--fg-color, #e9eaec);
+  --paio-bg: var(--comfy-menu-bg, #1b1d20);
+  --paio-panel: color-mix(in srgb, var(--paio-bg) 88%, white 8%);
+  --paio-panel-strong: color-mix(in srgb, var(--paio-bg) 78%, white 12%);
+  --paio-input: color-mix(in srgb, var(--paio-bg) 83%, black 12%);
+  --paio-text: var(--fg-color, #edf0f4);
   --paio-muted: color-mix(in srgb, var(--paio-text) 58%, transparent);
-  --paio-border: color-mix(in srgb, var(--paio-text) 22%, transparent);
+  --paio-border: color-mix(in srgb, var(--paio-text) 18%, transparent);
+  --paio-border-strong: color-mix(in srgb, var(--paio-text) 32%, transparent);
   --paio-accent: var(--primary-color, #60a5fa);
   --paio-danger: #ef4444;
-  height: 100%;
-  min-width: 280px;
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
   color: var(--paio-text);
-  background: var(--paio-bg);
   font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+  pointer-events: none;
 }
 
 #prompt-all-in-one-root *,
@@ -32,7 +35,7 @@
   min-height: 30px;
   padding: 5px 9px;
   border: 1px solid var(--paio-border);
-  border-radius: 7px;
+  border-radius: 6px;
   background: var(--paio-panel);
   cursor: pointer;
 }
@@ -40,7 +43,16 @@
 #prompt-all-in-one-root button:hover:not(:disabled),
 #prompt-all-in-one-root button.active {
   border-color: var(--paio-accent);
-  background: color-mix(in srgb, var(--paio-accent) 18%, var(--paio-panel));
+  background: color-mix(in srgb, var(--paio-accent) 16%, var(--paio-panel));
+}
+
+#prompt-all-in-one-root button:focus-visible,
+#prompt-all-in-one-root input:focus-visible,
+#prompt-all-in-one-root textarea:focus-visible,
+#prompt-all-in-one-root select:focus-visible,
+#prompt-all-in-one-root [tabindex]:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--paio-accent) 72%, white);
+  outline-offset: 2px;
 }
 
 #prompt-all-in-one-root button:disabled {
@@ -56,18 +68,11 @@
 #prompt-all-in-one-root textarea,
 #prompt-all-in-one-root select {
   width: 100%;
-  border: 1px solid var(--paio-border);
-  border-radius: 7px;
-  background: var(--paio-input);
   padding: 8px;
+  border: 1px solid var(--paio-border);
+  border-radius: 6px;
   outline: none;
-}
-
-#prompt-all-in-one-root input:focus,
-#prompt-all-in-one-root textarea:focus,
-#prompt-all-in-one-root select:focus {
-  border-color: var(--paio-accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--paio-accent) 20%, transparent);
+  background: var(--paio-input);
 }
 
 #prompt-all-in-one-root textarea {

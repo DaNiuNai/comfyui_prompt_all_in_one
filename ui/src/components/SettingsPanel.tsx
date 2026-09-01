@@ -1,7 +1,7 @@
 import { ChangeEvent, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Provider, Settings } from '../types'
+import { HotkeyAction, HotkeySettings, Provider, Settings } from '../types'
 
 interface ImportSummary {
   accepted: number
@@ -101,6 +101,13 @@ export function SettingsPanel({
     setSummary(null)
   }
 
+  const saveHotkey = (key: keyof HotkeySettings, value: HotkeyAction) =>
+    onSaveSettings({
+      hotkeys: { ...settings.hotkeys, [key]: value }
+    })
+
+  const gestureOptions: HotkeyAction[] = ['none', 'edit', 'disable', 'extend']
+
   return (
     <section className="paio-settings">
       <h3>{t('settings.interface')}</h3>
@@ -165,6 +172,39 @@ export function SettingsPanel({
           }
         />
       </label>
+
+      <h3>{t('settings.gestures')}</h3>
+      <div className="paio-gesture-grid">
+        {(
+          [
+            ['click', 'click'],
+            ['double_click', 'doubleClick'],
+            ['right_click', 'rightClick'],
+            ['hover', 'hover']
+          ] as const
+        ).map(([key, label]) => (
+          <label className="paio-field" key={key}>
+            <span>{t(`settings.gesture.${label}`)}</span>
+            <select
+              value={settings.hotkeys[key]}
+              onChange={(event) =>
+                void saveHotkey(key, event.target.value as HotkeyAction)
+              }
+            >
+              {gestureOptions
+                .filter(
+                  (action) =>
+                    key !== 'hover' || action === 'none' || action === 'extend'
+                )
+                .map((action) => (
+                  <option key={action} value={action}>
+                    {t(`settings.gesture.action.${action}`)}
+                  </option>
+                ))}
+            </select>
+          </label>
+        ))}
+      </div>
 
       <h3>{t('settings.translation')}</h3>
       <label className="paio-field">

@@ -21,7 +21,12 @@ const settings: Settings = {
   group_tags_translate: true,
   group_tag_colors: {},
   active_group: {},
-  hotkeys: {}
+  hotkeys: {
+    click: 'edit',
+    double_click: 'disable',
+    right_click: 'extend',
+    hover: 'extend'
+  }
 }
 
 describe('prompt parsing', () => {

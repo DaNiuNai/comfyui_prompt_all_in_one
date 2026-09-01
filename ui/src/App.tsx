@@ -1,16 +1,38 @@
 import { app } from '@comfyui/app'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  BookOpenText,
+  BrainCircuit,
+  ClipboardCopy,
+  Clock3,
+  Heart,
+  Library,
+  Settings as SettingsIcon,
+  Sparkles,
+  X
+} from 'lucide-react'
+import {
+  ButtonHTMLAttributes,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useTranslation } from 'react-i18next'
 
 import './App.css'
 import { AiPanel } from './components/AiPanel'
 import { CollectionPanel } from './components/CollectionPanel'
+import { FloatingPanel } from './components/FloatingPanel'
 import { GroupLibrary } from './components/GroupLibrary'
 import { SettingsPanel } from './components/SettingsPanel'
 import { TagEditor } from './components/TagEditor'
+import './index.css'
 import {
   BootstrapData,
   CollectionKind,
+  Drawer,
   Polarity,
   PromptDocument,
   PromptNode,
@@ -19,6 +41,7 @@ import {
 } from './types'
 import { promptApi } from './utils/api'
 import i18n from './utils/i18n'
+import { PanelState, loadPanelState, savePanelState } from './utils/panelState'
 import {
   createTag,
   documentFromPrompt,
@@ -27,10 +50,30 @@ import {
   serializeDocument
 } from './utils/prompt'
 
-type Tab = 'editor' | 'words' | 'history' | 'favorites' | 'ai' | 'settings'
+interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  label: string
+  active?: boolean
+  children: ReactNode
+}
 
-interface Props {
-  initialNode: PromptNode | null
+function IconButton({
+  label,
+  active = false,
+  children,
+  className = '',
+  ...props
+}: IconButtonProps) {
+  return (
+    <button
+      type="button"
+      className={`paio-icon-button ${active ? 'active' : ''} ${className}`}
+      aria-label={label}
+      title={label}
+      {...props}
+    >
+      {children}
+    </button>
+  )
 }
 
 function polarityForNode(node: PromptNode | null): Polarity | null {
@@ -53,26 +96,48 @@ function documentForNode(
   return documentFromPrompt(promptWidgetValue(node))
 }
 
-function App({ initialNode }: Props) {
+function App() {
   const { t } = useTranslation()
   const [data, setData] = useState<BootstrapData | null>(null)
-  const [node, setNode] = useState<PromptNode | null>(initialNode)
+  const [node, setNode] = useState<PromptNode | null>(null)
   const [document, setDocument] = useState<PromptDocument>(() =>
-    documentForNode(initialNode)
+    documentForNode(null)
   )
-  const [tab, setTab] = useState<Tab>('editor')
+  const [panel, setPanel] = useState<PanelState>(() =>
+    loadPanelState(window.innerWidth, window.innerHeight)
+  )
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const documentRef = useRef(document)
   const nodeRef = useRef(node)
   const dataRef = useRef(data)
+  const panelRef = useRef(panel)
   const committed = useRef<Map<string | number, string>>(new Map())
 
   useEffect(() => {
     documentRef.current = document
     nodeRef.current = node
     dataRef.current = data
-  }, [data, document, node])
+    panelRef.current = panel
+  }, [data, document, node, panel])
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => savePanelState(panel), 120)
+    return () => window.clearTimeout(timeout)
+  }, [panel])
+
+  const updatePanel = useCallback((next: PanelState) => {
+    panelRef.current = next
+    setPanel(next)
+  }, [])
+
+  const patchPanel = useCallback((updates: Partial<PanelState>) => {
+    setPanel((current) => {
+      const next = { ...current, ...updates }
+      panelRef.current = next
+      return next
+    })
+  }, [])
 
   const notify = useCallback(
     (severity: 'success' | 'info' | 'warn' | 'error', detail: string) => {
@@ -145,24 +210,48 @@ function App({ initialNode }: Props) {
   }, [notify])
 
   useEffect(() => {
-    const selectNode = (event: Event) => {
-      const next = (event as CustomEvent<PromptNode | null>).detail
-      if (nodeRef.current?.id !== next?.id) void commitCurrent()
+    const openNode = (event: Event) => {
+      const next = (event as CustomEvent<PromptNode>).detail
+      if (!next) return
+      const current = nodeRef.current
+      if (current?.id === next.id) {
+        if (panelRef.current.visible) void commitCurrent()
+        patchPanel({ visible: !panelRef.current.visible })
+        return
+      }
+      if (current) void commitCurrent()
       setNode(next)
-      setDocument(documentForNode(next))
+      nodeRef.current = next
+      const nextDocument = documentForNode(next)
+      setDocument(nextDocument)
+      documentRef.current = nextDocument
+      patchPanel({ visible: true })
     }
     const updateNode = (event: Event) => {
       const next = (event as CustomEvent<PromptNode | null>).detail
-      if (next?.id === nodeRef.current?.id)
-        setDocument(documentForNode(next, true))
+      if (next?.id !== nodeRef.current?.id) return
+      const nextDocument = documentForNode(next, true)
+      setDocument(nextDocument)
+      documentRef.current = nextDocument
     }
-    window.addEventListener('paio:node-selected', selectNode)
+    const removeNode = (event: Event) => {
+      const removed = (event as CustomEvent<PromptNode | null>).detail
+      if (removed?.id !== nodeRef.current?.id) return
+      setNode(null)
+      nodeRef.current = null
+      const empty = documentForNode(null)
+      setDocument(empty)
+      documentRef.current = empty
+    }
+    window.addEventListener('paio:open-node', openNode)
     window.addEventListener('paio:node-updated', updateNode)
+    window.addEventListener('paio:node-removed', removeNode)
     return () => {
-      window.removeEventListener('paio:node-selected', selectNode)
+      window.removeEventListener('paio:open-node', openNode)
       window.removeEventListener('paio:node-updated', updateNode)
+      window.removeEventListener('paio:node-removed', removeNode)
     }
-  }, [commitCurrent])
+  }, [commitCurrent, patchPanel])
 
   const updateDocument = useCallback(
     (next: PromptDocument) => {
@@ -254,7 +343,7 @@ function App({ initialNode }: Props) {
 
   const useRecord = (record: PromptRecord) => {
     updateDocument(documentFromPrompt(record.prompt))
-    setTab('editor')
+    patchPanel({ drawer: null })
   }
 
   const deleteRecord = async (kind: CollectionKind, record: PromptRecord) => {
@@ -338,108 +427,116 @@ function App({ initialNode }: Props) {
     }
   }
 
-  const tabs = useMemo<Array<[Tab, string]>>(
-    () => [
-      ['editor', t('tabs.editor')],
-      ['words', t('tabs.words')],
-      ['history', t('tabs.history')],
-      ['favorites', t('tabs.favorites')],
-      ['ai', t('tabs.ai')],
-      ['settings', t('tabs.settings')]
-    ],
-    [t]
+  const toggleDrawer = (drawer: Drawer) =>
+    patchPanel({ drawer: panel.drawer === drawer ? null : drawer })
+
+  const selectedTexts = useMemo(
+    () => new Set(document.tags.map((tag) => tag.text)),
+    [document]
   )
 
-  if (!data) {
-    return <div className="paio-loading">{error || t('common.loading')}</div>
-  }
+  const tagColors = useMemo(() => {
+    if (!data) return {}
+    const result: Record<string, string> = {}
+    data.group_tags.forEach((category) =>
+      category.groups.forEach((group) => {
+        const color =
+          data.settings.group_tag_colors[`${category.name}||${group.name}`] ||
+          group.color
+        if (!color) return
+        Object.keys(group.tags).forEach((tag) => {
+          result[tag] = color
+        })
+      })
+    )
+    return result
+  }, [data])
 
-  return (
-    <main className="paio-app">
-      <header className="paio-header">
-        <div>
-          <h2>{t('app.title')}</h2>
-          <small>
-            {node && polarity
-              ? t(`node.${polarity}`, { title: node.title, id: node.id })
-              : t('node.none')}
-          </small>
-        </div>
-        <div className="paio-header-actions">
-          <button
-            title={t('common.format')}
-            disabled={!polarity}
-            onClick={() => updateDocument(formatDocument(document))}
-          >
-            ✨
-          </button>
-          <button
-            title={t('common.copy')}
-            disabled={!polarity}
-            onClick={() => {
-              const operation = navigator.clipboard.writeText(
-                serializeDocument(document, data.settings)
-              )
-              void operation.then(() => notify('success', t('messages.copied')))
-            }}
-          >
-            ⧉
-          </button>
-        </div>
-      </header>
+  const title = (
+    <div className="paio-window-title">
+      <strong>{t('app.title')}</strong>
+      <span>
+        {node && polarity
+          ? t(`node.${polarity}`, { title: node.title, id: node.id })
+          : t('node.none')}
+      </span>
+    </div>
+  )
 
-      <nav className="paio-tabs">
-        {tabs.map(([key, label]) => (
-          <button
-            className={tab === key ? 'active' : ''}
-            key={key}
-            onClick={() => setTab(key)}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+  const actions = (
+    <>
+      <IconButton
+        label={t('common.format')}
+        disabled={!polarity || !data}
+        onClick={() => updateDocument(formatDocument(document))}
+      >
+        <Sparkles />
+      </IconButton>
+      <IconButton
+        label={t('common.copy')}
+        disabled={!polarity || !data}
+        onClick={() => {
+          if (!data) return
+          void navigator.clipboard
+            .writeText(serializeDocument(document, data.settings))
+            .then(() => notify('success', t('messages.copied')))
+        }}
+      >
+        <ClipboardCopy />
+      </IconButton>
+      <IconButton
+        label={t('tabs.history')}
+        active={panel.drawer === 'history'}
+        onClick={() => toggleDrawer('history')}
+      >
+        <Clock3 />
+      </IconButton>
+      <IconButton
+        label={t('tabs.favorites')}
+        active={panel.drawer === 'favorites'}
+        onClick={() => toggleDrawer('favorites')}
+      >
+        <Heart />
+      </IconButton>
+      <IconButton
+        label={t('tabs.ai')}
+        active={panel.drawer === 'ai'}
+        onClick={() => toggleDrawer('ai')}
+      >
+        <BrainCircuit />
+      </IconButton>
+      <IconButton
+        label={t('tabs.settings')}
+        active={panel.drawer === 'settings'}
+        onClick={() => toggleDrawer('settings')}
+      >
+        <SettingsIcon />
+      </IconButton>
+      <IconButton
+        label={t('common.close')}
+        onClick={() => {
+          void commitCurrent()
+          patchPanel({ visible: false })
+        }}
+      >
+        <X />
+      </IconButton>
+    </>
+  )
 
-      <div className="paio-content">
-        {tab === 'editor' &&
-          (polarity ? (
-            <TagEditor
-              document={document}
-              settings={data.settings}
-              models={data.models}
-              busy={busy}
-              onChange={updateDocument}
-              onCommit={() => void commitCurrent()}
-              onTranslate={translateTags}
-              onFavorite={favoriteTags}
-            />
-          ) : (
-            <div className="paio-empty prominent">{t('node.selectHint')}</div>
-          ))}
-        {tab === 'words' && (
-          <GroupLibrary
-            categories={data.group_tags}
-            colors={data.settings.group_tag_colors}
-            activeGroup={data.settings.active_group}
-            onAdd={(text) => {
-              updateDocument({
-                version: 1,
-                tags: [...document.tags, createTag(text)]
-              })
-              setTab('editor')
-            }}
-            onActiveChange={(categoryIndex, groupIndex) =>
-              void saveSettings({
-                active_group: {
-                  ...data.settings.active_group,
-                  categoryIndex,
-                  groupIndex
-                }
-              })
-            }
-          />
-        )}
-        {tab === 'history' && (
+  const drawer = data && panel.drawer && (
+    <aside className="paio-drawer" aria-label={t(`tabs.${panel.drawer}`)}>
+      <div className="paio-drawer-header">
+        <strong>{t(`tabs.${panel.drawer}`)}</strong>
+        <IconButton
+          label={t('common.close')}
+          onClick={() => patchPanel({ drawer: null })}
+        >
+          <X />
+        </IconButton>
+      </div>
+      <div className="paio-drawer-content">
+        {panel.drawer === 'history' && (
           <CollectionPanel
             kind="history"
             records={polarity ? data.collections.history[polarity] : []}
@@ -447,7 +544,7 @@ function App({ initialNode }: Props) {
             onDelete={(record) => deleteRecord('history', record)}
           />
         )}
-        {tab === 'favorites' && (
+        {panel.drawer === 'favorites' && (
           <CollectionPanel
             kind="favorites"
             records={polarity ? data.collections.favorites[polarity] : []}
@@ -455,7 +552,7 @@ function App({ initialNode }: Props) {
             onDelete={(record) => deleteRecord('favorites', record)}
           />
         )}
-        {tab === 'ai' && (
+        {panel.drawer === 'ai' && (
           <AiPanel
             busy={busy}
             onGenerate={generate}
@@ -464,11 +561,11 @@ function App({ initialNode }: Props) {
                 version: 1,
                 tags: [...document.tags, ...documentFromPrompt(prompt).tags]
               })
-              setTab('editor')
+              patchPanel({ drawer: null })
             }}
           />
         )}
-        {tab === 'settings' && (
+        {panel.drawer === 'settings' && (
           <SettingsPanel
             settings={data.settings}
             providers={data.providers}
@@ -481,7 +578,92 @@ function App({ initialNode }: Props) {
           />
         )}
       </div>
-    </main>
+    </aside>
+  )
+
+  return (
+    <FloatingPanel
+      state={panel}
+      title={title}
+      actions={actions}
+      onStateChange={updatePanel}
+    >
+      <div className={`paio-workspace ${panel.drawer ? 'has-drawer' : ''}`}>
+        <main className="paio-main-content">
+          {!data ? (
+            <div className="paio-loading">{error || t('common.loading')}</div>
+          ) : polarity ? (
+            <>
+              <TagEditor
+                document={document}
+                settings={data.settings}
+                models={data.models}
+                tagColors={tagColors}
+                busy={busy}
+                rawExpanded={panel.rawExpanded}
+                onRawExpandedChange={(rawExpanded) =>
+                  patchPanel({ rawExpanded })
+                }
+                onChange={updateDocument}
+                onCommit={() => void commitCurrent()}
+                onTranslate={translateTags}
+                onFavorite={favoriteTags}
+              />
+              <section className="paio-library-shell">
+                <button
+                  type="button"
+                  className="paio-section-heading"
+                  onClick={() =>
+                    patchPanel({ libraryExpanded: !panel.libraryExpanded })
+                  }
+                  aria-expanded={panel.libraryExpanded}
+                >
+                  <Library />
+                  <span>{t('tabs.words')}</span>
+                </button>
+                {panel.libraryExpanded && (
+                  <GroupLibrary
+                    categories={data.group_tags}
+                    colors={data.settings.group_tag_colors}
+                    activeGroup={data.settings.active_group}
+                    selectedTexts={selectedTexts}
+                    onToggle={(text) => {
+                      const existing = document.tags.find(
+                        (tag) => tag.text === text
+                      )
+                      updateDocument({
+                        version: 1,
+                        tags: existing
+                          ? document.tags.filter(
+                              (tag) => tag.id !== existing.id
+                            )
+                          : [...document.tags, createTag(text)]
+                      })
+                    }}
+                    onActiveChange={(categoryIndex, groupIndex) =>
+                      void saveSettings({
+                        active_group: {
+                          ...data.settings.active_group,
+                          categoryIndex,
+                          groupIndex
+                        }
+                      })
+                    }
+                  />
+                )}
+              </section>
+            </>
+          ) : (
+            <div className="paio-empty prominent">
+              <BookOpenText />
+              <strong>{t('node.selectHint')}</strong>
+              <span>{t('node.lockHint')}</span>
+            </div>
+          )}
+        </main>
+        {drawer}
+      </div>
+    </FloatingPanel>
   )
 }
 
