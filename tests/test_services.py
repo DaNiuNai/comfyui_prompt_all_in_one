@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 
 from prompt_all_in_one import services
+from prompt_all_in_one.provider_support import get_provider
 
 
 def _translators_provider() -> dict[str, Any]:
@@ -15,6 +16,15 @@ def _translators_provider() -> dict[str, Any]:
         "translator": "baidu",
         "support": {"zh_CN": "zh", "en_US": "en"},
     }
+
+
+def test_api_key_alibaba_provider_is_removed_but_free_provider_remains() -> None:
+    assert get_provider("alibaba") is None
+
+    free_provider = get_provider("alibaba_free")
+    assert free_provider is not None
+    assert free_provider["type"] == "translators"
+    assert free_provider["translator"] == "alibaba"
 
 
 def test_translators_error_is_converted_to_service_error(monkeypatch: pytest.MonkeyPatch) -> None:

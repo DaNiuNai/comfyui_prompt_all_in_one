@@ -202,30 +202,6 @@ wheels = [
 ]
 
 [[package]]
-name = "aliyun-python-sdk-alimt"
-version = "3.2.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "aliyun-python-sdk-core" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/3f/5f/b89b7ec66f1df7b56b611dc7a5683d2448ec560549a00e8ee909a20b90d0/aliyun-python-sdk-alimt-3.2.0.tar.gz", hash = "sha256:a33f0f358fe3eb113ba58f7517c3b979dda3d36abcb4597503fbbd4397d86ee0", size = 5518, upload-time = "2023-04-11T09:25:55.32Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3d/2c/158c9c5c1f4d0c5c21836b9fe884bebe1fc65729f34ca5e37b9a28e5f80b/aliyun_python_sdk_alimt-3.2.0-py2.py3-none-any.whl", hash = "sha256:167f301adfc34c10a86d0f85b21fa758e953c520d49faf447eb7db8d08df4acb", size = 24824, upload-time = "2023-04-11T09:25:53.324Z" },
-]
-
-[[package]]
-name = "aliyun-python-sdk-core"
-version = "2.16.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "cryptography" },
-    { name = "jmespath" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/38/eb3be49159d6442e68189f21a2205a199b51ca46cf42a3f874e695ff0ba9/aliyun_python_sdk_core-2.16.1-py3-none-any.whl", hash = "sha256:0f25a6e8ec1ea29c76610278cff81cbff85149a6e692bf2398a6f9b77e5e7424", size = 521331, upload-time = "2026-08-18T07:57:56.379Z" },
-]
-
-[[package]]
 name = "annotated-types"
 version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -793,8 +769,6 @@ name = "comfyui-prompt-all-in-one"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
-    { name = "aliyun-python-sdk-alimt" },
-    { name = "aliyun-python-sdk-core" },
     { name = "boto3" },
     { name = "openai" },
     { name = "pyyaml" },
@@ -816,8 +790,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aliyun-python-sdk-alimt", specifier = ">=3.0" },
-    { name = "aliyun-python-sdk-core", specifier = ">=2.15" },
     { name = "boto3", specifier = ">=1.34" },
     { name = "bump-my-version", marker = "extra == 'dev'" },
     { name = "coverage", marker = "extra == 'dev'" },
