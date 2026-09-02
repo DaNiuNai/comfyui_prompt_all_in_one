@@ -41,7 +41,7 @@ Documentation = "https://github.com/DaNiuNai/comfyui_prompt_all_in_one/wiki"
 
 
 [tool.comfy]
-PublisherId = "DaNiuNai"
+PublisherId = "daniunai"
 DisplayName = "comfyui-prompt-all-in-one"
 Icon = ""
 Tags = ["prompt", "translation", "productivity"]
