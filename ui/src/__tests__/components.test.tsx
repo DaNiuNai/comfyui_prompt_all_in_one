@@ -20,6 +20,7 @@ const settings: Settings = {
   source_language: 'zh_CN',
   target_language: 'en_US',
   preserve_translation_case: false,
+  auto_translate_on_add: true,
   auto_remove_space: true,
   trailing_comma: false,
   separator: ', ',
@@ -106,6 +107,56 @@ describe('TagEditor', () => {
     const changedDocument = onChange.mock.calls[0]?.[0]
     expect(changedDocument.tags[0].text).toBe('测试')
     expect(changedDocument.tags[0].translation).toBeUndefined()
+  })
+
+  it('shows an existing library translation below a matching tag', () => {
+    const onChange = jest.fn()
+    renderEditor({
+      document: documentFromPrompt('1boy, suit, girl'),
+      tagTranslations: { suit: '西装' },
+      onChange
+    })
+
+    expect(screen.getByText('西装')).toHaveClass('paio-library-translation')
+    expect(
+      screen.queryByRole('button', { name: '西装' })
+    ).not.toBeInTheDocument()
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('automatically translates only newly added Chinese tags', () => {
+    const onChange = jest.fn()
+    const onTranslate = jest.fn().mockResolvedValue(undefined)
+    renderEditor({ onChange, onTranslate })
+
+    fireEvent.change(screen.getByPlaceholderText('editor.addPlaceholder'), {
+      target: { value: '女孩, suit, 男孩' }
+    })
+    fireEvent.click(screen.getByRole('button', { name: /common.add/ }))
+
+    const changedDocument = onChange.mock.calls[0][0]
+    expect(
+      changedDocument.tags.slice(-3).map((tag: { text: string }) => tag.text)
+    ).toEqual(['女孩', 'suit', '男孩'])
+    expect(onTranslate).toHaveBeenCalledWith([
+      changedDocument.tags.at(-3).id,
+      changedDocument.tags.at(-1).id
+    ])
+  })
+
+  it('does not translate newly added tags when auto translation is disabled', () => {
+    const onTranslate = jest.fn().mockResolvedValue(undefined)
+    renderEditor({
+      settings: { ...settings, auto_translate_on_add: false },
+      onTranslate
+    })
+
+    fireEvent.change(screen.getByPlaceholderText('editor.addPlaceholder'), {
+      target: { value: '女孩' }
+    })
+    fireEvent.click(screen.getByRole('button', { name: /common.add/ }))
+
+    expect(onTranslate).not.toHaveBeenCalled()
   })
 
   it('uses the configured click and double-click gestures', () => {
@@ -279,6 +330,35 @@ describe('GroupLibrary', () => {
 })
 
 describe('SettingsPanel', () => {
+  it('saves the automatic translation preference', () => {
+    const onSaveSettings = jest.fn().mockResolvedValue(undefined)
+    render(
+      <SettingsPanel
+        settings={settings}
+        providers={[]}
+        credentials={{}}
+        busy={false}
+        onSaveSettings={onSaveSettings}
+        onSaveCredentials={jest.fn().mockResolvedValue(undefined)}
+        onImport={jest.fn().mockResolvedValue({
+          accepted: 0,
+          skipped: 0,
+          invalid: 0,
+          settings: 0
+        })}
+        onReload={jest.fn().mockResolvedValue(undefined)}
+      />
+    )
+
+    fireEvent.click(
+      screen.getByRole('checkbox', { name: 'settings.autoTranslateOnAdd' })
+    )
+
+    expect(onSaveSettings).toHaveBeenCalledWith({
+      auto_translate_on_add: false
+    })
+  })
+
   it('saves the translation casing preference', () => {
     const onSaveSettings = jest.fn().mockResolvedValue(undefined)
     render(

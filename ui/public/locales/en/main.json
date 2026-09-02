@@ -86,6 +86,7 @@
     "provider": "Translation provider",
     "sourceLanguage": "Source language",
     "targetLanguage": "Target language",
+    "autoTranslateOnAdd": "Automatically translate newly added Chinese tags",
     "preserveTranslationCase": "Preserve the translation result's original letter case",
     "secretConfigured": "Configured; leave blank to preserve the existing secret",
     "saveService": "Save service configuration",

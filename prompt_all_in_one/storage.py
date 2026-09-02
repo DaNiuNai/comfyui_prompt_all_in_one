@@ -36,6 +36,7 @@ DEFAULT_SETTINGS: dict[str, Any] = {
     "source_language": "zh_CN",
     "target_language": "en_US",
     "preserve_translation_case": False,
+    "auto_translate_on_add": True,
     "auto_remove_space": True,
     "trailing_comma": False,
     "separator": ", ",
@@ -141,8 +142,10 @@ class UserStorage:
         if unknown:
             raise StorageError(f"Unknown settings: {', '.join(sorted(unknown))}")
         updates = deepcopy(updates)
-        if "preserve_translation_case" in updates and not isinstance(updates["preserve_translation_case"], bool):
-            raise StorageError("preserve_translation_case must be a boolean")
+        boolean_settings = ("preserve_translation_case", "auto_translate_on_add")
+        for key in boolean_settings:
+            if key in updates and not isinstance(updates[key], bool):
+                raise StorageError(f"{key} must be a boolean")
         if "hotkeys" in updates:
             current_hotkeys = self.get_settings()["hotkeys"]
             incoming = updates["hotkeys"]

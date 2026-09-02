@@ -86,6 +86,7 @@
     "provider": "翻译服务",
     "sourceLanguage": "源语言",
     "targetLanguage": "目标语言",
+    "autoTranslateOnAdd": "添加中文标签时自动翻译",
     "preserveTranslationCase": "保留翻译结果的原始大小写",
     "secretConfigured": "已配置；留空可保留现有密钥",
     "saveService": "保存服务配置",

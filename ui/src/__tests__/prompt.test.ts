@@ -1,6 +1,7 @@
 import { Settings } from '../types'
 import {
   adjustWeight,
+  containsChineseText,
   documentFromPrompt,
   filterTagsPreservingLineBreaks,
   formatDocument,
@@ -19,6 +20,7 @@ const settings: Settings = {
   source_language: 'zh_CN',
   target_language: 'en_US',
   preserve_translation_case: false,
+  auto_translate_on_add: true,
   auto_remove_space: true,
   trailing_comma: false,
   separator: ', ',
@@ -35,6 +37,12 @@ const settings: Settings = {
 }
 
 describe('prompt parsing', () => {
+  it('detects Chinese text for automatic translation', () => {
+    expect(containsChineseText('女孩')).toBe(true)
+    expect(containsChineseText('1男孩')).toBe(true)
+    expect(containsChineseText('suit')).toBe(false)
+  })
+
   it('preserves nested commas and LoRA syntax', () => {
     expect(
       splitPrompt(

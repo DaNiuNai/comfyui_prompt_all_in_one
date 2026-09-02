@@ -294,7 +294,8 @@ function App() {
 
   const translateTags = async (ids: string[]) => {
     if (!data || !ids.length) return
-    const tags = document.tags.filter((tag) => ids.includes(tag.id))
+    const tags = documentRef.current.tags.filter((tag) => ids.includes(tag.id))
+    if (!tags.length) return
     setBusy(true)
     try {
       const response = await promptApi.translate(
@@ -467,6 +468,22 @@ function App() {
     return result
   }, [data])
 
+  const tagTranslations = useMemo(() => {
+    if (!data) return {}
+    const result: Record<string, string> = {}
+    data.group_tags.forEach((category) =>
+      category.groups.forEach((group) => {
+        if (!isGroupTagGroup(group)) return
+        Object.entries(group.tags).forEach(([tag, translation]) => {
+          if (typeof translation === 'string' && translation.trim()) {
+            result[tag] = translation
+          }
+        })
+      })
+    )
+    return result
+  }, [data])
+
   const title = (
     <div className="paio-window-title">
       <strong>{t('app.title')}</strong>
@@ -614,6 +631,7 @@ function App() {
                 settings={data.settings}
                 models={data.models}
                 tagColors={tagColors}
+                tagTranslations={tagTranslations}
                 busy={busy}
                 rawExpanded={panel.rawExpanded}
                 onRawExpandedChange={(rawExpanded) =>

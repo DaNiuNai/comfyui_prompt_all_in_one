@@ -28,6 +28,7 @@ def test_default_tag_gestures_match_the_panel_defaults(tmp_path: Path) -> None:
     settings = UserStorage(tmp_path).get_settings()
 
     assert settings["preserve_translation_case"] is False
+    assert settings["auto_translate_on_add"] is True
     assert settings["hotkeys"] == {
         "click": "none",
         "double_click": "edit",
@@ -42,6 +43,14 @@ def test_preserve_translation_case_requires_a_boolean(tmp_path: Path) -> None:
     assert storage.update_settings({"preserve_translation_case": True})["preserve_translation_case"] is True
     with pytest.raises(StorageError, match="preserve_translation_case must be a boolean"):
         storage.update_settings({"preserve_translation_case": "true"})
+
+
+def test_auto_translate_on_add_requires_a_boolean(tmp_path: Path) -> None:
+    storage = UserStorage(tmp_path)
+
+    assert storage.update_settings({"auto_translate_on_add": False})["auto_translate_on_add"] is False
+    with pytest.raises(StorageError, match="auto_translate_on_add must be a boolean"):
+        storage.update_settings({"auto_translate_on_add": "false"})
 
 
 def test_hotkeys_are_deep_merged_and_legacy_keys_are_normalized(tmp_path: Path) -> None:

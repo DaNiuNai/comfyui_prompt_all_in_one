@@ -41,6 +41,7 @@ import { useTranslation } from 'react-i18next'
 import { HotkeyAction, PromptDocument, PromptTag, Settings } from '../types'
 import {
   adjustWeight,
+  containsChineseText,
   documentFromPrompt,
   filterTagsPreservingLineBreaks,
   modelReferenceState,
@@ -54,6 +55,7 @@ interface Props {
   settings: Settings
   models: Record<'checkpoints' | 'loras' | 'embeddings', string[]>
   tagColors?: Record<string, string>
+  tagTranslations?: Record<string, string>
   busy: boolean
   rawExpanded: boolean
   onRawExpandedChange: (expanded: boolean) => void
@@ -90,6 +92,7 @@ interface SortableTagProps {
   groupDragging: boolean
   modelState: 'found' | 'missing' | null
   color?: string
+  libraryTranslation?: string
   settings: Settings
   editing: boolean
   onEditingChange: (editing: boolean) => void
@@ -123,6 +126,7 @@ function SortableTag({
   groupDragging,
   modelState,
   color,
+  libraryTranslation,
   settings,
   editing,
   onEditingChange,
@@ -273,6 +277,9 @@ function SortableTag({
             {tag.translation}
           </button>
         )}
+        {!tag.translation && libraryTranslation && !editing && (
+          <span className="paio-library-translation">{libraryTranslation}</span>
+        )}
         {modelState && (
           <small className={`model-${modelState}`}>
             {t(`models.${modelState}`)}
@@ -364,6 +371,7 @@ export function TagEditor({
   settings,
   models,
   tagColors = {},
+  tagTranslations = {},
   busy,
   rawExpanded,
   onRawExpandedChange,
@@ -443,6 +451,12 @@ export function TagEditor({
     if (!additions.length) return
     changeTags([...document.tags, ...additions])
     setNewTag('')
+    if (settings.auto_translate_on_add) {
+      const ids = additions
+        .filter((tag) => containsChineseText(tag.text))
+        .map((tag) => tag.id)
+      if (ids.length) void onTranslate(ids)
+    }
   }
 
   const removeIds = (ids: ReadonlySet<string>) => {
@@ -757,6 +771,7 @@ export function TagEditor({
                     }
                     modelState={modelReferenceState(tag.text, models)}
                     color={tagColors[tag.text]}
+                    libraryTranslation={tagTranslations[tag.text]}
                     settings={settings}
                     editing={editingId === tag.id}
                     onEditingChange={(editing) =>

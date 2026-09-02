@@ -10,6 +10,12 @@ const BRACKETS: Record<string, string> = {
 
 let nextTagId = 0
 
+const CHINESE_CHARACTER_PATTERN = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u
+
+export function containsChineseText(text: string): boolean {
+  return CHINESE_CHARACTER_PATTERN.test(text)
+}
+
 interface PromptPart {
   text: string
   lineBreakBefore: boolean

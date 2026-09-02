@@ -256,6 +256,18 @@ export function SettingsPanel({
         <label>
           <input
             type="checkbox"
+            checked={settings.auto_translate_on_add}
+            onChange={(event) =>
+              void onSaveSettings({
+                auto_translate_on_add: event.target.checked
+              })
+            }
+          />
+          {t('settings.autoTranslateOnAdd')}
+        </label>
+        <label>
+          <input
+            type="checkbox"
             checked={settings.preserve_translation_case}
             onChange={(event) =>
               void onSaveSettings({

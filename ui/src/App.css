@@ -354,7 +354,8 @@
   font-size: 12px;
 }
 
-#prompt-all-in-one-root .paio-translation {
+#prompt-all-in-one-root .paio-translation,
+#prompt-all-in-one-root .paio-library-translation {
   display: block;
   overflow: hidden;
   width: 100%;
