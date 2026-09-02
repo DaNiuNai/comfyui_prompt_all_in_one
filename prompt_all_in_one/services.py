@@ -11,7 +11,6 @@ PROVIDER_CLASSES: dict[str, tuple[str, str]] = {
     "google": ("google_tanslator", "GoogleTranslator"),
     "microsoft": ("microsoft_translator", "MicrosoftTranslator"),
     "openai": ("openai_translator", "OpenaiTranslator"),
-    "amazon": ("amazon_translator", "AmazonTranslator"),
     "deepl": ("deepl_translator", "DeeplTranslator"),
     "baidu": ("baidu_translator", "BaiduTranslator"),
     "yandex": ("yandex_translator", "YandexTranslator"),
